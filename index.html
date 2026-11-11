@@ -902,6 +902,7 @@ AU('a-form').addEventListener('submit', async e => {
       if (pw.length < 10) { msg('A senha precisa ter no mínimo 10 caracteres.', 'err'); return; } if (pw !== p2) { msg('As senhas não conferem.', 'err'); return; }
       const {data, error} = await sb.auth.signUp({email: em, password: pw, options: {emailRedirectTo: location.origin + location.pathname}});
       if (error) { msg('Não foi possível criar o acesso: ' + error.message, 'err'); return; } AU('a-pass').value = AU('a-pass2').value = '';
+      if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) { await sb.auth.resetPasswordForEmail(em, {redirectTo: location.origin + location.pathname}); setMode('login', 'Este e-mail já tem acesso. Enviamos agora um link para você criar uma nova senha. Abra o e-mail mais recente e clique no link.', 'ok'); return; }
       if (data.session) { startApp(data.session); return; } setMode('login', 'Pronto. Abra o e-mail de confirmação e clique no link. Depois volte aqui e entre com e-mail e senha.', 'ok'); }
     else { const p2 = AU('a-pass2').value; if (pw.length < 10) { msg('A senha precisa ter no mínimo 10 caracteres.', 'err'); return; } if (pw !== p2) { msg('As senhas não conferem.', 'err'); return; }
       const {error} = await sb.auth.updateUser({password: pw}); if (error) { msg('Não foi possível salvar a senha: ' + error.message, 'err'); return; }
