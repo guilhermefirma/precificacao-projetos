@@ -14,11 +14,11 @@
   --card:#0a0a0a; --oncard:#ffffff; --oncard-mute:#a6a6a6;
   --ok:#17663f; --okbg:#e2f2e9; --bad:#a3231b; --warn:#8a5a00; --warnbg:#fbeccd;
   --display:'Funnel Display','Inter',system-ui,sans-serif; --text:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
-  --w:1240px; --radius:28px;
+  --w:1800px; --radius:28px;
 }
 *{box-sizing:border-box}
 html,body{background:var(--bg);color:var(--ink)}
-body{font-family:var(--text);font-size:14px;line-height:1.45;margin:0;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+body{font-family:var(--text);font-size:14px;line-height:1.45;margin:0;padding-left:max(clamp(16px,3vw,40px),env(safe-area-inset-left,0px));padding-right:max(clamp(16px,3vw,40px),env(safe-area-inset-right,0px))}
 .in{max-width:var(--w);margin:0 auto}
 button,input,select,textarea{font:inherit;color:inherit}
 :focus-visible{outline:2px solid var(--ink);outline-offset:2px}
@@ -35,7 +35,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 .f-sys-s{display:block;font-weight:500;font-size:14px;color:var(--muted);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .f-act{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .f-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--hair-2);background:var(--bg);color:var(--ink);border-radius:999px;padding:9px 16px;font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap;line-height:1.2;text-decoration:none}
-.f-btn:hover{border-color:var(--ink)}
+.f-btn:hover{border-color:var(--ink)}.f-btn svg{width:14px;height:14px;flex:none}
 .f-btn.pri{background:var(--ink);border-color:var(--ink);color:#fff;font-weight:600}
 .f-btn.pri:hover{opacity:.9}
 .f-btn[disabled]{opacity:.45;cursor:default}
@@ -46,7 +46,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 .vt[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--ink)}
 
 /* Estrutura */
-.layout{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:24px;align-items:start}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) clamp(340px,24vw,400px);gap:clamp(20px,2vw,32px);align-items:start}
 .col{display:flex;flex-direction:column;gap:12px;min-width:0}
 .card{border:1px solid var(--hair);border-radius:22px;background:var(--bg);padding:18px}
 .eb{font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--muted);font-weight:600}
@@ -73,7 +73,7 @@ h2{font-family:var(--display);font-weight:500;font-size:20px;letter-spacing:-.02
 .chev{width:9px;height:9px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg);transition:transform .15s;margin-right:4px}
 .fr.open .chev{transform:rotate(-135deg)}
 .fb{padding:0 18px 18px}
-.items{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px}
+.items{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:10px}
 .it{background:var(--bg);border:1px solid var(--hair);border-radius:16px;padding:12px 14px;display:flex;flex-direction:column;gap:6px;min-width:0;cursor:pointer}
 .it:hover{border-color:var(--ink-2)}
 .it.sel{border:1.5px solid var(--ink);padding:11.5px 13.5px;box-shadow:0 0 0 3px var(--surface)}
@@ -113,7 +113,17 @@ h2{font-family:var(--display);font-weight:500;font-size:20px;letter-spacing:-.02
 .sugg button:hover,.sugg button.on{border-color:var(--ink)}
 .sugg button span:last-child{font-weight:600;white-space:nowrap;font-variant-numeric:tabular-nums}
 .sugg .src{color:var(--muted);font-size:11px;display:block}
-.best .t{min-width:820px}.note-best{font-size:12px;color:var(--muted);margin:10px 2px 0}
+.best .t{min-width:700px}.note-best{font-size:12px;color:var(--muted);margin:10px 2px 0}.t td small.su{display:block;color:var(--muted);font-weight:400}
+.col{container-type:inline-size}
+.best-l{display:none;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:8px}
+.best-t .acts{flex-wrap:nowrap}
+@container (max-width:860px){.best-t{display:none}.best-l{display:grid}}
+.bl{border:1px solid var(--hair);border-radius:16px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.bl-h{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.bl-h b{font-weight:600;line-height:1.3}
+.bl-v{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;font-variant-numeric:tabular-nums}
+.bl-v span{display:block;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:2px}
+.bl-v b{font-size:12.5px;white-space:nowrap}.bl-v small{display:block;color:var(--muted);font-size:11px}
+.bl .acts{display:grid;grid-template-columns:1fr 1fr;gap:6px}.bl .acts .mini{padding:8px 10px}
 .pre{border:1px solid var(--hair);border-radius:18px;padding:14px 16px;display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
 .pre b{font-family:var(--display);font-weight:500;font-size:16px}.pre p{margin:4px 0 0;color:var(--muted);font-size:12.5px;max-width:80ch}
 .link{background:none;border:0;color:var(--ink);text-decoration:underline;text-underline-offset:2px;cursor:pointer;font-size:12px;font-weight:500;padding:0;white-space:nowrap}
@@ -193,7 +203,7 @@ td .badge{display:inline-block;margin-top:4px;font-size:11px;padding:2px 9px}.ba
 .basis{background:var(--surface);border-radius:14px;padding:12px 14px;font-size:12.5px;color:var(--ink-2)}
 .basis div{display:flex;justify-content:space-between;gap:12px;padding:3px 0}
 .basis div b{font-variant-numeric:tabular-nums;white-space:nowrap}
-.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:999px;font-size:13px;z-index:80;max-width:calc(100vw - 32px)}
+.toast{position:fixed;left:50%;bottom:calc(var(--sheet,0px) + 24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:999px;font-size:13px;z-index:80;max-width:calc(100vw - 32px)}
 
 /* Login */
 .auth{position:fixed;inset:0;z-index:200;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:24px 16px;overflow:auto}
@@ -217,7 +227,7 @@ td .badge{display:inline-block;margin-top:4px;font-size:11px;padding:2px 9px}.ba
 .auth-foot{margin-top:40px;font-size:12px;color:var(--muted)}
 
 @media (max-width:1100px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}.s3{grid-column:span 2}}
-@media (max-width:960px){
+@media (max-width:1100px){
   .layout{grid-template-columns:1fr}
   .side{position:fixed;top:auto;left:0;right:0;bottom:0;box-shadow:0 -12px 30px rgba(0,0,0,.18);border-radius:24px 24px 0 0;padding:14px max(16px,env(safe-area-inset-right,0px)) calc(14px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));z-index:30;gap:12px;max-height:80vh;overflow:auto}
   .side .more{display:none}.side.open .more{display:flex}
@@ -227,7 +237,7 @@ td .badge{display:inline-block;margin-top:4px;font-size:11px;padding:2px 9px}.ba
 .more{display:flex;flex-direction:column;gap:14px}
 @media (max-width:720px){
   .f-top{padding-block:12px 10px;margin-bottom:16px}
-  .f-act{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .f-act{width:100%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.f-act .f-switch{grid-column:1/-1}
   .f-btn{padding:10px 12px}
   .grid{grid-template-columns:1fr 1fr}.s2,.s3,.s4{grid-column:1/-1}
   .items{grid-template-columns:1fr}
@@ -235,6 +245,7 @@ td .badge{display:inline-block;margin-top:4px;font-size:11px;padding:2px 9px}.ba
   .md{padding:20px}.md .g2,.md .g3{grid-template-columns:1fr}
   .f-foot-top{gap:28px}.f-cols{gap:24px}.f-col{min-width:130px}
 }
+@media (min-width:721px) and (max-width:1100px){.side{left:50%;right:auto;transform:translateX(-50%);width:min(760px,calc(100% - 48px))}}
 @media (max-width:560px){.f-sys-s{display:none}.f-sys-t{font-size:19px}.f-mark{height:40px}.side .big{font-size:28px}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 
@@ -357,6 +368,7 @@ function memDb(seed){ const T = clone(seed);
 }
 
 /* ---------- estado ---------- */
+let bestOpen = (() => { try { return sessionStorage.getItem('pp-best') === '1'; } catch(_) { return false; } })();
 let SHARES = {}; const ACEITE = 'https://guilhermefirma.github.io/precificacao-projetos/aceite/';
 let CAT = [], SET = clone(DEF), CLIENTS = [], PROPS = [], PRESETS = [], OPPCAT = [], CBOPTS = [], cbIdx = 0, P = null, view = 'comp', seg = 'mensal', openF = new Set(['growth']), ready = false, denied = false, offline = false, dirty = false, sideOpen = false;
 function newProp(){ return {id: null, number: '', client: '', project: '', contact: '', date: todayISO(), validade: SET.validade, meses: SET.meses, pagamento: SET.pagamento || '', obs: '',
@@ -543,7 +555,7 @@ function discTable(T){
     ${u.map(r).join('')}${sumRow('Total itens únicos', T.unico)}${m.map(r).join('')}${sumRow('Total mensal', T.mensal)}${T.mensal.n && T.meses ? sumRow('Contrato (' + T.meses + ' meses)', T.contrato) : ''}
     </tbody></table></div>`;
 }
-function syncPad(){ const sd = $('side'); if (!sd) return; document.body.style.paddingBottom = window.matchMedia('(max-width:960px)').matches ? (sd.offsetHeight + 24) + 'px' : ''; }
+function syncPad(){ const sd = $('side'); if (!sd) return; const m = window.matchMedia('(max-width:1100px)').matches; document.body.style.paddingBottom = m ? (sd.offsetHeight + 24) + 'px' : ''; document.documentElement.style.setProperty('--sheet', m ? sd.offsetHeight + 'px' : '0px'); }
 function viewProps(){
   if (!PROPS.length) return '<div class="empty"><b>Nenhuma proposta salva</b>Monte o escopo na aba Composição e clique em Salvar.</div>';
   const rows = PROPS.slice().sort((a,b) => String(b.number).localeCompare(String(a.number))).map(p => { const T = calc(p);
@@ -595,15 +607,17 @@ function bestRows(){
 function bestHTML(){
   const R = bestRows(); if (!R.length) return '';
   const per = r => r.mensal ? '/mês' : '';
-  return `<section class="card best"><div class="bar" style="margin:0 0 10px"><div><span class="eb">Escopos mais vendidos</span><h2 style="margin-top:4px">O que a FIRMA vende hoje</h2></div><span class="st">Preço praticado nos contratos ao lado da tabela de referência e do sugerido com ${PCT(P.params.descPadrao/100)} de desconto</span></div>
-    <div class="tw"><table class="t"><thead><tr><th class="l">Escopo</th><th>Clientes</th><th>Praticado FIRMA</th><th>Tabela</th><th>Sugerido</th><th>Espaço até o sugerido</th><th></th></tr></thead><tbody>
-    ${R.map(r => { const gap = r.sug - r.prat, gp = r.sug ? gap / r.sug : 0;
-      return `<tr><td class="l"><b>${esc(r.o.name)}</b><small>${esc(r.what)}</small></td><td>${r.n || '·'}</td>
-        <td><b>${BRL(r.prat)}${per(r)}</b>${r.setup ? `<small style="display:block;color:var(--muted)">+ ${BRL(r.setup)} implantação</small>` : ''}</td>
-        <td>${BRL(r.tab)}${per(r)}</td><td>${BRL(r.sug)}${per(r)}</td>
-        <td class="${gap > 0 ? '' : 'pos'}">${gap > 0 ? '+' + BRL(gap) + `<small style="display:block;color:var(--muted)">${PCT(gp)} acima do praticado</small>` : 'No sugerido ou acima'}</td>
-        <td><div class="acts"><button class="mini" data-best="${r.i}" data-bmode="sug">+ Sugerido</button><button class="mini" data-best="${r.i}" data-bmode="prat">+ Praticado</button></div></td></tr>`; }).join('')}
-    </tbody></table></div><p class="note-best">Praticado: preços atuais do cardápio do Menu de oportunidades. Clientes: quantos clientes ativos já têm o serviço no escopo. "+ Praticado" inclui o item com o preço fechado no valor praticado.</p></section>`;
+  const btns = r => `<div class="acts"><button class="mini" data-best="${r.i}" data-bmode="sug">+ Sugerido</button><button class="mini" data-best="${r.i}" data-bmode="prat">+ Praticado</button></div>`;
+  const prat = r => `<b>${BRL(r.prat)}${per(r)}</b>${r.setup ? `<small class="su">+ ${BRL(r.setup)} implantação</small>` : ''}`;
+  const body = bestOpen ? `<div class="fb"><p class="note-best" style="margin:0 2px 12px">Preço praticado nos contratos ao lado da tabela de referência e do sugerido com ${PCT(P.params.descPadrao/100)} de desconto.</p>
+    <div class="tw best-t"><table class="t"><thead><tr><th class="l">Escopo</th><th>Clientes</th><th>Praticado FIRMA</th><th>Tabela</th><th>Sugerido</th><th></th></tr></thead><tbody>
+    ${R.map(r => `<tr><td class="l"><b>${esc(r.o.name)}</b><small>${esc(r.what)}</small></td><td>${r.n || '·'}</td><td>${prat(r)}</td><td>${BRL(r.tab)}${per(r)}</td><td><b>${BRL(r.sug)}${per(r)}</b></td><td>${btns(r)}</td></tr>`).join('')}
+    </tbody></table></div>
+    <div class="best-l">${R.map(r => `<div class="bl"><div class="bl-h"><b>${esc(r.o.name)}</b><span class="badge">${r.n ? r.n + (r.n === 1 ? ' cliente' : ' clientes') : 'novo'}</span></div><small class="w">${esc(r.what)}</small>
+      <div class="bl-v"><div><span>Praticado</span>${prat(r)}</div><div><span>Tabela</span><b>${BRL(r.tab)}${per(r)}</b></div><div><span>Sugerido</span><b>${BRL(r.sug)}${per(r)}</b></div></div>${btns(r)}</div>`).join('')}</div>
+    <p class="note-best">Praticado: preços atuais do cardápio do Menu de oportunidades. Clientes: quantos clientes ativos já têm o serviço no escopo. "+ Praticado" inclui o item com o preço fechado no valor praticado.</p></div>` : '';
+  return `<section class="fr best${bestOpen ? ' open' : ''}"><button class="fh" data-bestt="1" aria-expanded="${bestOpen}"><div><div class="nm">Escopos mais vendidos</div><div class="ds">O que a FIRMA vende hoje, com praticado, tabela e sugerido</div></div>
+    <span class="badge">${R.length} escopos</span><span class="chev"></span></button>${body}</section>`;
 }
 function addBest(i, mode){
   const r = bestRows().find(x => x.i === i); if (!r) return; const it = r.it, c = it.code;
@@ -752,6 +766,7 @@ document.addEventListener('click', async e => {
   if (t.closest('#b-out')) { if (sb) await sb.auth.signOut(); try { sessionStorage.removeItem('pp-draft'); } catch(_) {} location.reload(); return; }
   if (t.id === 'ov' || t.closest('[data-close]')) { closeModal(); return; }
   const cbo = t.closest('[data-cbo]'); if (cbo) { pickCb(+cbo.dataset.cbo); return; }
+  if (t.closest('[data-bestt]')) { bestOpen = !bestOpen; try { sessionStorage.setItem('pp-best', bestOpen ? '1' : '0'); } catch(_) {} render(); return; }
   const bst = t.closest('[data-best]'); if (bst) { addBest(+bst.dataset.best, bst.dataset.bmode); return; }
   if (!t.closest('#cb')) closeCb();
   const sgb = t.closest('[data-sg]'); if (sgb) { useSugg(+sgb.dataset.sg); return; }
