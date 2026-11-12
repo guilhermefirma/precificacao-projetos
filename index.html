@@ -14,11 +14,11 @@
   --card:#0a0a0a; --oncard:#ffffff; --oncard-mute:#a6a6a6;
   --ok:#17663f; --okbg:#e2f2e9; --bad:#a3231b; --warn:#8a5a00; --warnbg:#fbeccd;
   --display:'Funnel Display','Inter',system-ui,sans-serif; --text:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
-  --w:1800px; --radius:28px;
+  --w:1560px; --radius:28px;
 }
 *{box-sizing:border-box}
 html,body{background:var(--bg);color:var(--ink)}
-body{font-family:var(--text);font-size:14px;line-height:1.45;margin:0;padding-left:max(clamp(16px,3vw,40px),env(safe-area-inset-left,0px));padding-right:max(clamp(16px,3vw,40px),env(safe-area-inset-right,0px))}
+body{font-family:var(--text);font-size:14px;line-height:1.45;margin:0;padding-left:max(clamp(20px,4vw,72px),env(safe-area-inset-left,0px));padding-right:max(clamp(20px,4vw,72px),env(safe-area-inset-right,0px))}
 .in{max-width:var(--w);margin:0 auto}
 button,input,select,textarea{font:inherit;color:inherit}
 :focus-visible{outline:2px solid var(--ink);outline-offset:2px}
@@ -115,6 +115,19 @@ h2{font-family:var(--display);font-weight:500;font-size:20px;letter-spacing:-.02
 .sugg .src{color:var(--muted);font-size:11px;display:block}
 .best .t{min-width:700px}.note-best{font-size:12px;color:var(--muted);margin:10px 2px 0}.t td small.su{display:block;color:var(--muted);font-weight:400}
 .col{container-type:inline-size}
+.kps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.kp{background:var(--surface);border-radius:18px;padding:14px 16px;display:flex;flex-direction:column;gap:3px;min-width:0}.kp span{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.kp b{font-family:var(--display);font-weight:500;font-size:22px;letter-spacing:-.02em;font-variant-numeric:tabular-nums}.kp small{font-size:12px;color:var(--muted)}
+.pfil{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:space-between}.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:1px solid var(--hair-2);background:var(--bg);border-radius:999px;padding:7px 12px;font-size:12.5px;font-weight:500;cursor:pointer;color:var(--ink)}.chip span{color:var(--muted);margin-left:4px}
+.chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}.chip[aria-pressed="true"] span{color:#a6a6a6}
+#pq{font:500 14px var(--text);background:var(--surface);border:1px solid transparent;border-radius:999px;padding:9px 16px;min-width:260px;outline:none}#pq:focus{border-color:var(--ink);background:var(--bg)}
+.stb{display:inline-block;font-size:11.5px;font-weight:600;border-radius:999px;padding:3px 10px;white-space:nowrap}.stb.ok{background:var(--okbg);color:var(--ok)}.stb.wait{background:var(--warnbg);color:var(--warn)}.stb.draft{background:var(--surface);color:var(--muted)}
+.st-c small{display:block;color:var(--muted);font-size:11.5px;margin-top:3px}
+.props-l{display:none;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:8px}.pcard{border:1px solid var(--hair);border-radius:16px;padding:12px 14px;display:flex;flex-direction:column;gap:10px}
+.pcard b{font-weight:600}.pcard .bl-h small{display:block;margin-top:2px}.pcard .acts{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}.pcard .acts .mini{grid-column:span 2;padding:7px 6px}.pcard .acts .mini:nth-child(n+4){grid-column:span 3}
+@container (max-width:900px){.props-t{display:none}.props-l{display:grid}.kps{grid-template-columns:1fr 1fr}}
+@media (max-width:720px){#pq{min-width:0;width:100%}.kp b{font-size:18px}}
 .best-l{display:none;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:8px}
 .best-t .acts{flex-wrap:nowrap}
 @container (max-width:860px){.best-t{display:none}.best-l{display:grid}}
@@ -237,7 +250,7 @@ td .badge{display:inline-block;margin-top:4px;font-size:11px;padding:2px 9px}.ba
 .more{display:flex;flex-direction:column;gap:14px}
 @media (max-width:720px){
   .f-top{padding-block:12px 10px;margin-bottom:16px}
-  .f-act{width:100%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.f-act .f-switch{grid-column:1/-1}
+  .f-act{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:8px}.f-act>:first-child{grid-column:1/-1}
   .f-btn{padding:10px 12px}
   .grid{grid-template-columns:1fr 1fr}.s2,.s3,.s4{grid-column:1/-1}
   .items{grid-template-columns:1fr}
@@ -368,7 +381,7 @@ function memDb(seed){ const T = clone(seed);
 
 /* ---------- estado ---------- */
 let bestOpen = (() => { try { return sessionStorage.getItem('pp-best') === '1'; } catch(_) { return false; } })();
-let SHARES = {}; const ACEITE = 'https://guilhermefirma.github.io/precificacao-projetos/aceite/';
+let SHARES = {}, propF = 'all', propQ = ''; const ACEITE = 'https://guilhermefirma.github.io/precificacao-projetos/aceite/';
 let CAT = [], SET = clone(DEF), CLIENTS = [], PROPS = [], PRESETS = [], OPPCAT = [], CBOPTS = [], cbIdx = 0, P = null, view = 'comp', seg = 'mensal', openF = new Set(['growth']), ready = false, denied = false, offline = false, dirty = false, sideOpen = false;
 function newProp(){ return {id: null, number: '', client: '', project: '', contact: '', date: todayISO(), validade: SET.validade, meses: SET.meses, pagamento: SET.pagamento || '', obs: '',
   descExtra: 0, mostrarRef: SET.mostrarRef !== false, params: paramsFrom(SET), items: {}, order: []}; }
@@ -451,7 +464,7 @@ function renderActs(){
 }
 function renderTabs(){
   const t = $('vtabs'); if (!ready) { t.innerHTML = ''; return; }
-  const tabs = [['comp', 'Composição' + (P.number ? ' · ' + P.number : '')], ['props', 'Propostas salvas (' + PROPS.length + ')'], ['cat', 'Cardápio (' + CAT.length + ')']];
+  const tabs = [['comp', 'Composição' + (P.number ? ' · ' + P.number : '')], ['props', 'Propostas geradas (' + PROPS.length + ')'], ['cat', 'Cardápio (' + CAT.length + ')']];
   t.innerHTML = tabs.map(([k, l]) => `<button class="vt" role="tab" aria-selected="${view === k}" data-view="${k}">${esc(l)}</button>`).join('');
 }
 function priceOf(it){ const s = P.params; return it.unit === 'pct' ? null : roundUp((hasParts(it) ? partsRef(it, partDefaults(it)) : it.ref)*(1 + s.reajuste/100)*(1 - s.descPadrao/100)*(1 - (+P.descExtra||0)/100), s.arred); }
@@ -555,14 +568,30 @@ function discTable(T){
     </tbody></table></div>`;
 }
 function syncPad(){ const sd = $('side'); if (!sd) return; const m = window.matchMedia('(max-width:1100px)').matches; document.body.style.paddingBottom = m ? (sd.offsetHeight + 24) + 'px' : ''; document.documentElement.style.setProperty('--sheet', m ? sd.offsetHeight + 'px' : '0px'); }
+function propStatus(p){ const a = p.share && SHARES[p.share]; return a ? {k: 'ok', l: 'Aceite formalizado', d: dtBR(a.at) + ' · ' + a.name} : p.share ? {k: 'wait', l: 'Aguardando aceite', d: 'Link gerado'} : {k: 'draft', l: 'Sem link', d: 'Só salva'}; }
 function viewProps(){
-  if (!PROPS.length) return '<div class="empty"><b>Nenhuma proposta salva</b>Monte o escopo na aba Composição e clique em Salvar.</div>';
-  const rows = PROPS.slice().sort((a,b) => String(b.number).localeCompare(String(a.number))).map(p => { const T = calc(p);
-    return `<tr><td class="l"><b>${esc(p.number)}</b><small>${dBR(p.date)}</small>${p.share && SHARES[p.share] ? '<span class="badge okb">Aprovada</span>' : p.share ? '<span class="badge">Aguardando aceite</span>' : ''}</td><td class="l">${esc(p.client)}<small>${esc(p.project)}</small></td>
-      <td>${T.mensal.n ? BRL(T.mensal.price) + '/mês' : ''}</td><td>${T.unico.n ? BRL(T.unico.price) : ''}</td><td>${BRL(T.contrato.price)}</td><td class="pos">${BRL(T.contrato.mg)}<small style="display:block;color:var(--muted)">${T.contrato.price ? PCT(T.contrato.mg/T.contrato.price) : ''}</small></td>
-      <td><div class="acts"><button class="mini" data-open="${p.id}">Abrir</button><button class="mini" data-ppdf="${p.id}">PDF</button><button class="mini" data-dup="${p.id}">Duplicar</button><button class="mini del" data-pdel="${p.id}">Excluir</button></div></td></tr>`; }).join('');
-  return `<div class="bar" style="margin-bottom:12px"><h2>Propostas salvas</h2><span class="st">Valores com os parâmetros gravados em cada proposta</span></div>
-    <div class="tw"><table class="t"><thead><tr><th class="l">Nº</th><th class="l">Cliente e projeto</th><th>Mensal</th><th>Único</th><th>Contrato</th><th>Margem</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  if (!PROPS.length) return '<div class="empty"><b>Nenhuma proposta gerada</b>Monte o escopo na aba Composição e clique em Salvar ou Exportar proposta.</div>';
+  const all = PROPS.map(p => ({p, T: calc(p), st: propStatus(p)}));
+  const cnt = k => all.filter(x => k === 'all' || x.st.k === k).length;
+  const q = propQ.trim().toLowerCase();
+  const rows = all.filter(x => (propF === 'all' || x.st.k === propF) && (!q || [x.p.number, x.p.client, x.p.project, x.p.contact].join(' ').toLowerCase().includes(q)))
+    .sort((a,b) => String(b.p.updatedAt || b.p.date || '').localeCompare(String(a.p.updatedAt || a.p.date || '')));
+  const ok = all.filter(x => x.st.k === 'ok'), sent = all.filter(x => x.st.k !== 'draft');
+  const kpi = (l, v, sub) => `<div class="kp"><span>${l}</span><b>${v}</b>${sub ? `<small>${sub}</small>` : ''}</div>`;
+  const kpis = `<div class="kps">${kpi('Propostas geradas', all.length, sent.length + ' com link enviado')}${kpi('Aceites formalizados', ok.length, sent.length ? PCT(ok.length/sent.length) + ' dos links enviados' : '')}
+    ${kpi('Mensal com aceite', BRL(ok.reduce((t,x) => t + x.T.mensal.price, 0)) + '/mês', 'soma dos aceites')}${kpi('Mensal em aberto', BRL(all.filter(x => x.st.k === 'wait').reduce((t,x) => t + x.T.mensal.price, 0)) + '/mês', 'aguardando aceite')}</div>`;
+  const chips = [['all','Todas'],['wait','Aguardando aceite'],['ok','Aceite formalizado'],['draft','Sem link']].map(([k,l]) => `<button class="chip" data-pf="${k}" aria-pressed="${propF === k}">${l} <span>${cnt(k)}</span></button>`).join('');
+  const acts = p => `<div class="acts"><button class="mini" data-open="${p.id}">Abrir</button><button class="mini" data-ppdf="${p.id}">PDF</button><button class="mini" data-plink="${p.id}">${p.share ? 'Copiar link' : 'Gerar link'}</button><button class="mini" data-dup="${p.id}">Duplicar</button><button class="mini del" data-pdel="${p.id}">Excluir</button></div>`;
+  const badge = st => `<span class="stb ${st.k}">${st.l}</span><small>${esc(st.d)}</small>`;
+  const tr = rows.map(({p, T, st}) => `<tr><td class="l"><b>${esc(p.number)}</b><small>${dBR(p.date)}${p.by ? ' · ' + esc(String(p.by).split('@')[0]) : ''}</small></td><td class="l">${esc(p.client)}<small>${esc(p.project)}</small></td>
+      <td>${T.mensal.n ? BRL(T.mensal.price) + '/mês' : ''}</td><td>${T.unico.n ? BRL(T.unico.price) : ''}</td><td class="pos">${BRL(T.contrato.mg)}<small style="display:block;color:var(--muted)">${T.contrato.price ? PCT(T.contrato.mg/T.contrato.price) : ''}</small></td>
+      <td class="l st-c">${badge(st)}</td><td>${acts(p)}</td></tr>`).join('');
+  const cards = rows.map(({p, T, st}) => `<div class="pcard"><div class="bl-h"><div><b>${esc(p.client)}</b><small class="w">${esc(p.project)} · ${esc(p.number)} · ${dBR(p.date)}</small></div></div>
+      <div class="st-c">${badge(st)}</div>
+      <div class="bl-v"><div><span>Mensal</span><b>${T.mensal.n ? BRL(T.mensal.price) + '/mês' : '·'}</b></div><div><span>Único</span><b>${T.unico.n ? BRL(T.unico.price) : '·'}</b></div><div><span>Margem</span><b class="pos">${BRL(T.contrato.mg)}</b></div></div>${acts(p)}</div>`).join('');
+  return `<div class="col"><div class="bar" style="margin:0"><h2>Propostas geradas</h2><span class="st">Status do aceite de cada proposta</span></div>${kpis}
+    <div class="pfil"><div class="chips">${chips}</div><input id="pq" type="search" placeholder="Buscar proposta" value="${esc(propQ)}" autocomplete="off"></div>
+    ${rows.length ? `<div class="tw props-t"><table class="t"><thead><tr><th class="l">Nº</th><th class="l">Cliente e projeto</th><th>Mensal</th><th>Único</th><th>Margem</th><th class="l">Status</th><th></th></tr></thead><tbody>${tr}</tbody></table></div><div class="props-l">${cards}</div>` : '<div class="empty"><b>Nada encontrado</b>Mude o filtro ou a busca.</div>'}</div>`;
 }
 function viewCat(){
   const s = P.params, rj = 1 + s.reajuste/100, std = 1 - s.descPadrao/100;
@@ -771,7 +800,7 @@ document.addEventListener('click', async e => {
   const sgb = t.closest('[data-sg]'); if (sgb) { useSugg(+sgb.dataset.sg); return; }
   const pa = t.closest('[data-papply]'); if (pa) { const pr = PRESETS.find(x => x.id === pa.dataset.papply); if (pr) { view = 'comp'; applyPreset(pr); } return; }
   const pdl = t.closest('[data-predel]'); if (pdl) { confirmBtn(pdl, async () => { const keep = PRESETS; PRESETS = PRESETS.filter(x => x.id !== pdl.dataset.predel); try { await savePresets(); render(); toast('Projeto de referência excluído.'); } catch(err) { PRESETS = keep; toast('Não foi possível excluir.'); } }); return; }
-  const vb = t.closest('[data-view]'); if (vb) { view = vb.dataset.view; render(); return; }
+  const vb = t.closest('[data-view]'); if (vb) { view = vb.dataset.view; render(); if (view === 'props') loadAccepts().then(() => { if (view === 'props') render(); }); return; }
   const a = t.closest('[data-a]');
   if (a) { const k = a.dataset.a;
     if (k === 'new') { if (dirty && !confirm('Descartar as alterações não salvas desta proposta?')) return; P = newProp(); dirty = false; saveDraft(); view = 'comp'; render(); }
@@ -790,7 +819,11 @@ document.addEventListener('click', async e => {
   const it = t.closest('[data-it]'); if (it) { toggleItem(it.dataset.it); return; }
   const op = t.closest('[data-open]'); if (op) { if (dirty && !confirm('Descartar as alterações não salvas da proposta aberta?')) return; P = normProp(clone(PROPS.find(p => p.id === op.dataset.open))); dirty = false; saveDraft(); view = 'comp'; render(); return; }
   const dp = t.closest('[data-dup]'); if (dp) { const s = normProp(clone(PROPS.find(p => p.id === dp.dataset.dup))); s.id = null; s.number = ''; s.date = todayISO(); s.project = s.project + ' (cópia)'; P = s; dirty = true; saveDraft(); view = 'comp'; render(); toast('Cópia aberta. Ajuste e salve para gerar o novo número.'); return; }
-  const pp = t.closest('[data-ppdf]'); if (pp) { exportPDF(pp, normProp(clone(PROPS.find(p => p.id === pp.dataset.ppdf)))); return; }
+  const pfb = t.closest('[data-pf]'); if (pfb) { propF = pfb.dataset.pf; render(); return; }
+  const pl = t.closest('[data-plink]'); if (pl) { const pr = normProp(clone(PROPS.find(p => p.id === pl.dataset.plink))); pl.disabled = true;
+    try { const url = await ensureShare(pr); PROPS = await DB.all('pricing_proposals'); if (P.id === pr.id) P.share = pr.share; try { await navigator.clipboard.writeText(url); toast('Link da proposta ' + pr.number + ' copiado.'); } catch(_) { prompt('Copie o link da proposta:', url); } render(); }
+    catch(err) { console.error(err); toast('Não foi possível gerar o link.'); pl.disabled = false; } return; }
+  const pp = t.closest('[data-ppdf]'); if (pp) { const pr = normProp(clone(PROPS.find(p => p.id === pp.dataset.ppdf))); await exportPDF(pp, pr); if (pr.share) { PROPS = await DB.all('pricing_proposals'); if (P.id === pr.id) P.share = pr.share; if (view === 'props') render(); } return; }
   const pd = t.closest('[data-pdel]'); if (pd) { confirmBtn(pd, async () => { try { await DB.del('pricing_proposals', pd.dataset.pdel); if (P.id === pd.dataset.pdel) { P.id = null; P.number = ''; dirty = true; } PROPS = await DB.all('pricing_proposals'); render(); toast('Proposta excluída.'); } catch(err) { toast('Não foi possível excluir.'); } }); return; }
   const ce = t.closest('[data-cedit]'); if (ce) { catModal(ce.dataset.cedit); return; }
   const cd = t.closest('[data-cdel]'); if (cd) { confirmBtn(cd, async () => { const it = CAT.find(c => c.code === cd.dataset.cdel); try { await DB.del('pricing_catalog', it.id); CAT = await loadCat(); render(); toast('Item excluído do cardápio.'); } catch(err) { toast('Não foi possível excluir.'); } }); return; }
@@ -806,6 +839,7 @@ document.addEventListener('focusin', e => { if (e.target.id === 'q') { cbIdx = 0
 document.addEventListener('input', e => {
   const t = e.target;
   if (t.id === 'q') { cbIdx = 0; renderCb(); return; }
+  if (t.id === 'pq') { propQ = t.value; render(); const n = $('pq'); if (n) { n.focus(); n.setSelectionRange(n.value.length, n.value.length); } return; }
   if (t.form && t.form.id === 'f-cat') { if (t.name === 'ref') t.dataset.touched = '1'; if (t.name === 'name' || t.name === 'desc') renderSugg(true); return; }
   if (t.dataset.f) { const k = t.dataset.f; P[k] = t.type === 'checkbox' ? t.checked : (k === 'validade' || k === 'meses') ? Math.max(0, Math.round(numIn(t.value))) : t.value; markDirty(); if (k === 'meses') refreshNums(); return; }
   if (t.dataset.pc) { const [c, pid] = t.dataset.pc.split('|'), sl = P.items[c]; if (sl) { sl.parts = sl.parts || {}; const pt = (sl.snap.parts||[]).find(x => x.id === pid);
