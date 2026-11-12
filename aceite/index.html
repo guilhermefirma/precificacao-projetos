@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Proposta FIRMA · Aprovação</title>
+<link rel="icon" href="../firma.png">
+<style>
+:root{--ink:#0a0a0a;--ink2:#3d3d3d;--muted:#6e6e6e;--line:#e6e6e6;--surface:#f4f4f4;--bg:#fff}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased}
+.wrap{max-width:860px;margin:0 auto;padding:28px 20px 80px}
+header{display:flex;align-items:center;gap:14px;padding-bottom:18px;border-bottom:1px solid var(--line)}
+header img{width:44px;height:auto}
+header small{display:block;font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--muted)}
+header b{font-size:16px;font-weight:500}
+header .r{margin-left:auto;text-align:right;font-size:13px;color:var(--muted);line-height:1.5}
+.eb{font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--muted);margin:34px 0 6px}
+h1{font-size:clamp(30px,6vw,44px);line-height:1.05;margin:0;letter-spacing:-.02em;text-wrap:balance}
+.sub{color:var(--muted);font-size:16px;margin:8px 0 0}
+.inv{background:var(--ink);color:#fff;border-radius:20px;padding:26px 28px;margin:28px 0 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px}
+.inv small{display:block;font-size:11px;font-weight:700;letter-spacing:.08em;color:#a6a6a6}
+.inv b{display:block;font-size:clamp(28px,5vw,36px);letter-spacing:-.02em;margin:6px 0 2px;font-variant-numeric:tabular-nums}
+.inv span{font-size:13px;color:#a6a6a6}
+.inv .ref{grid-column:1/-1;border-top:1px solid #333;padding-top:14px;font-size:13px;color:#a6a6a6}
+h2{font-size:22px;margin:44px 0 14px;letter-spacing:-.01em}
+.why{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:10px}
+.why div{background:var(--surface);border-radius:14px;padding:18px}
+.why b{display:block;font-size:15px;margin-bottom:6px}
+.why p{margin:0;color:var(--ink2);font-size:14px;line-height:1.5}
+.fr{font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--muted);border-bottom:1.5px solid var(--ink);padding:18px 0 6px}
+.ln{display:grid;grid-template-columns:1fr auto;gap:4px 20px;padding:14px 0;border-bottom:1px solid #ececec}
+.ln b{font-size:15px}.ln p{margin:2px 0 0;color:var(--muted);font-size:13.5px;line-height:1.45;grid-column:1}
+.ln .v{text-align:right;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+.ln .v small{display:block;font-weight:400;color:var(--muted);font-size:12px}
+.tot{display:flex;justify-content:flex-end;gap:14px;align-items:baseline;padding:10px 0 0;font-variant-numeric:tabular-nums}
+.tot span{color:var(--muted);font-size:14px}.tot b{font-size:18px}
+.cd{display:grid;grid-template-columns:130px 1fr;gap:6px 16px;font-size:14px;line-height:1.5}
+.cd b{font-size:13px}.cd span{color:var(--ink2)}
+.box{border:1.5px solid var(--ink);border-radius:20px;padding:26px;margin-top:10px}
+.sig{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-bottom:22px}
+.sig>div{background:var(--surface);border-radius:14px;padding:16px 18px}
+.sig small{display:block;font-size:10.5px;font-weight:700;letter-spacing:.08em;color:var(--muted)}
+.sig .n{font-family:"Times New Roman",Times,serif;font-style:italic;font-size:28px;margin:10px 0 4px;border-bottom:1px solid var(--ink);padding-bottom:4px;min-height:44px}
+.sig p{margin:4px 0 0;font-size:12.5px;color:var(--muted)}
+form{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+label{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600}label .o{font-weight:400;color:var(--muted)}
+input[type=text],input[type=email]{font:inherit;font-size:16px;font-weight:400;border:1px solid #cfcfcf;border-radius:12px;padding:12px 14px;outline:none}
+input:focus{border-color:var(--ink);box-shadow:0 0 0 3px rgba(10,10,10,.08)}
+.full{grid-column:1/-1}
+.chk{flex-direction:row;align-items:flex-start;gap:10px;font-weight:400;font-size:14px;line-height:1.45;color:var(--ink2)}
+.chk input{width:18px;height:18px;margin-top:2px;accent-color:#0a0a0a;flex:none}
+button{font:inherit;font-size:16px;font-weight:700;border:0;border-radius:999px;background:var(--ink);color:#fff;padding:16px 22px;cursor:pointer}
+button[disabled]{opacity:.45;cursor:default}
+.err{color:#b42318;font-size:13.5px;min-height:1em}
+.legal{font-size:12px;color:var(--muted);line-height:1.5;margin:14px 0 0}
+.done{text-align:center;padding:18px 0 6px}
+.done .ck{width:56px;height:56px;border-radius:50%;background:var(--ink);color:#fff;display:inline-grid;place-items:center;font-size:28px}
+.done h3{font-size:24px;margin:14px 0 6px}.done p{color:var(--ink2);margin:0}
+.msg{padding:80px 0;text-align:center}.msg h1{font-size:28px}.msg p{color:var(--muted)}
+footer{margin-top:50px;border-top:1px solid var(--line);padding-top:14px;font-size:12px;color:var(--muted)}
+footer a{color:inherit}
+@media (max-width:600px){form{grid-template-columns:1fr}.cd{grid-template-columns:1fr;gap:0 0}.cd b{margin-top:10px}.inv{padding:22px}}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"><div class="msg"><p>Carregando a proposta…</p></div></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
+const SB_URL = 'https://cahgrygzwfufukijwjks.supabase.co', SB_KEY = 'sb_publishable_BvUbGFJpR1j2jz05-B54qA_P2OO0WJo';
+const $ = id => document.getElementById(id), app = $('app');
+const esc = v => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const BRL = n => (+n||0).toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'});
+const dBR = iso => iso ? iso.slice(0,10).split('-').reverse().join('/') : '';
+const dtBR = iso => { try { return new Date(iso).toLocaleString('pt-BR', {timeZone: 'America/Sao_Paulo', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'}).replace(',', ' às'); } catch(_) { return ''; } };
+const today = () => new Date().toLocaleDateString('sv-SE', {timeZone: 'America/Sao_Paulo'});
+const WHY = [['13 anos e mais de 500 projetos', 'Experiência acumulada com marcas de diferentes setores, do varejo à indústria, da saúde ao agro.'],
+  ['Um só time de marketing, tecnologia e IA', 'A FIRMA atua como o departamento de marketing, tech e IA da sua empresa, com estratégia, criação, mídia e dados no mesmo lugar.'],
+  ['Método DATA FIRMA', 'Medimos a maturidade digital da marca no início e acompanhamos a evolução com números, não com impressões.'],
+  ['Lideranças obcecadas pelo seu resultado', 'Cada frente é comandada por especialistas que respondem por metas, sob a mesma cultura de compromisso.']];
+const token = new URLSearchParams(location.search).get('t') || '';
+const sb = window.supabase ? window.supabase.createClient(SB_URL, SB_KEY, {auth: {persistSession: false, autoRefreshToken: false}}) : null;
+let D = null, ACC = null;
+
+const msg = (h, p) => { app.innerHTML = `<div class="msg"><h1>${esc(h)}</h1><p>${esc(p)}</p></div>${foot()}`; };
+const foot = () => `<footer>FIRMA · <a href="https://agenciafirma.com.br" target="_blank" rel="noopener">agenciafirma.com.br</a> · CNPJ 20.431.153/0001-09</footer>`;
+
+function page(){
+  const d = D, sgn = d.signer || {}, expired = d.validUntil && d.validUntil < today() && !ACC;
+  const ref = d.ref && d.ref.tabela > 0 ? (() => { const base = d.ref.mensal ? d.mensal : d.unico, pct = Math.round((1 - base/d.ref.tabela)*100);
+    return `<div class="ref">Valor de mercado (tabela Sinapro): ${BRL(d.ref.tabela)}${d.ref.mensal ? '/mês' : ''} · Condição FIRMA: ${pct}% abaixo do mercado</div>`; })() : '';
+  const inv = (d.mensal ? `<div><small>INVESTIMENTO MENSAL</small><b>${BRL(d.mensal)}</b><span>por mês</span></div>` : '') + (d.unico ? `<div><small>PROJETOS E ENTREGAS ÚNICAS</small><b>${BRL(d.unico)}</b><span>valor único</span></div>` : '');
+  const scope = (d.fronts || []).map(f => `<div class="fr">${esc(f.name.toUpperCase())}</div>` + f.lines.map(l => `<div class="ln"><b>${esc(l.name)}</b><div class="v">${BRL(l.price)}${l.rec === 'mensal' ? '/mês' : ''}<small>${esc(l.q)}</small></div>${l.desc ? `<p>${esc(l.desc)}</p>` : ''}</div>`).join('')).join('');
+  const tots = (d.mensal ? `<div class="tot"><span>Investimento mensal</span><b>${BRL(d.mensal)}/mês</b></div>` : '') + (d.unico ? `<div class="tot"><span>Projetos e entregas únicas</span><b>${BRL(d.unico)}</b></div>` : '');
+  const cond = (d.cond || []).map(([l, v]) => `<b>${esc(l)}</b><span>${esc(v)}</span>`).join('');
+  const firma = `<div><small>PELA FIRMA</small><div class="n">${esc(sgn.name || '')}</div><b style="font-size:14px">${esc([sgn.name, sgn.role].filter(Boolean).join(', '))}</b><p>FIRMA · CNPJ 20.431.153/0001-09${sgn.name ? '<br>Assinado eletronicamente em ' + esc(dBR(d.date)) : ''}</p></div>`;
+  const cli = ACC ? `<div><small>PELO CLIENTE</small><div class="n">${esc(ACC.name)}</div><b style="font-size:14px">${esc([ACC.name, ACC.role].filter(Boolean).join(', '))}</b><p>${esc([d.client, ACC.doc].filter(Boolean).join(' · '))}<br>Aprovado eletronicamente em ${esc(dtBR(ACC.at))}</p></div>`
+    : `<div><small>PELO CLIENTE</small><div class="n" id="pv"></div><b style="font-size:14px">${esc(d.client)}</b><p>Sua assinatura aparece aqui ao aprovar.</p></div>`;
+  const form = ACC ? `<div class="done"><div class="ck">✓</div><h3>Proposta aprovada</h3><p>Obrigado, ${esc(ACC.name.split(' ')[0])}. A FIRMA já recebeu sua aprovação e entra em contato para o início do projeto.</p></div>`
+    : expired ? `<div class="done"><h3>Esta proposta venceu em ${esc(dBR(d.validUntil))}</h3><p>Fale com a FIRMA para receber uma versão atualizada.</p></div>`
+    : `<form id="f" novalidate>
+        <label>Nome completo<input type="text" name="name" autocomplete="name" required></label>
+        <label>E-mail<input type="email" name="email" autocomplete="email" required></label>
+        <label><span>CPF ou CNPJ <span class="o">(opcional)</span></span><input type="text" name="doc" inputmode="numeric"></label>
+        <label><span>Cargo <span class="o">(opcional)</span></span><input type="text" name="role" autocomplete="organization-title"></label>
+        <label class="chk full"><input type="checkbox" name="ok"><span>Li e aprovo a proposta ${esc(d.number)} de ${esc(d.client)}, com o escopo, os valores e as condições acima, e autorizo o início do projeto.</span></label>
+        <div class="err full" id="err"></div>
+        <button class="full" id="go" type="submit">Aprovar proposta</button>
+      </form>`;
+  app.innerHTML = `<header><img src="../firma.png" alt="FIRMA"><div><small>PROPOSTA COMERCIAL</small><b>${esc(d.project)}</b></div><div class="r">${esc(d.number)}<br>${esc(dBR(d.date))}</div></header>
+    <div class="eb">PREPARADA PARA</div><h1>${esc(d.client)}</h1><p class="sub">${esc([d.project, d.contact].filter(Boolean).join(' · '))}</p>
+    <div class="inv">${inv}${ref}</div>
+    <h2>Por que a FIRMA</h2><div class="why">${WHY.map(([h, p]) => `<div><b>${esc(h)}</b><p>${esc(p)}</p></div>`).join('')}</div>
+    <h2>Escopo da proposta</h2>${scope}<div style="margin-top:8px">${tots}</div>
+    ${cond ? `<h2>Condições</h2><div class="cd">${cond}</div>` : ''}
+    <h2 id="aceite">${ACC ? 'Aprovação' : 'Aprovar proposta'}</h2>
+    <div class="box"><div class="sig">${firma}${cli}</div>${form}
+      <p class="legal">Aceite eletrônico com registro de data, hora, IP e identificação do signatário, admitido entre as partes nos termos da MP 2.200-2/2001, art. 10, § 2º, e da Lei 14.063/2020. Se preferir, a FIRMA envia esta proposta para assinatura digital via ClickSign.</p></div>
+    ${foot()}`;
+  const f = $('f'); if (!f) return;
+  f.elements.name.addEventListener('input', e => { $('pv').textContent = e.target.value; });
+  f.addEventListener('submit', async e => { e.preventDefault(); const g = n => f.elements[n].value.trim();
+    const name = g('name'), email = g('email');
+    if (name.split(/\s+/).length < 2) { $('err').textContent = 'Informe nome e sobrenome.'; return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { $('err').textContent = 'Informe um e-mail válido.'; return; }
+    if (!f.elements.ok.checked) { $('err').textContent = 'Marque a caixa de aprovação para continuar.'; return; }
+    $('err').textContent = ''; $('go').disabled = true; $('go').textContent = 'Registrando aprovação…';
+    try { const {data, error} = await sb.rpc('share_accept', {t: token, nome: name, email, doc: g('doc'), cargo: g('role')}); if (error) throw error;
+      ACC = data; page(); $('aceite').scrollIntoView({behavior: 'smooth', block: 'start'}); }
+    catch(err) { console.error(err); const m = String(err.message || '');
+      $('err').textContent = m.includes('expired') ? 'Esta proposta venceu. Fale com a FIRMA.' : 'Não foi possível registrar agora. Tente de novo em instantes.';
+      $('go').disabled = false; $('go').textContent = 'Aprovar proposta'; } });
+}
+
+(async () => {
+  if (!token || !/^[a-f0-9]{24,64}$/.test(token)) { msg('Link inválido', 'Confira o link recebido da FIRMA.'); return; }
+  if (!sb) { msg('Não foi possível carregar', 'Recarregue a página.'); return; }
+  try { const {data, error} = await sb.rpc('share_get', {t: token}); if (error) throw error;
+    if (!data || !data.data) { msg('Proposta não encontrada', 'Confira o link recebido da FIRMA.'); return; }
+    D = data.data; ACC = data.accepted || null; document.title = 'Proposta FIRMA · ' + D.client; page(); }
+  catch(e) { console.error(e); msg('Não foi possível carregar', 'Recarregue a página em instantes.'); }
+})();
+</script>
+</body>
+</html>

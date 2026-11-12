@@ -113,6 +113,7 @@ h2{font-family:var(--display);font-weight:500;font-size:20px;letter-spacing:-.02
 .sugg button:hover,.sugg button.on{border-color:var(--ink)}
 .sugg button span:last-child{font-weight:600;white-space:nowrap;font-variant-numeric:tabular-nums}
 .sugg .src{color:var(--muted);font-size:11px;display:block}
+.best .t{min-width:820px}.note-best{font-size:12px;color:var(--muted);margin:10px 2px 0}
 .pre{border:1px solid var(--hair);border-radius:18px;padding:14px 16px;display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
 .pre b{font-family:var(--display);font-weight:500;font-size:16px}.pre p{margin:4px 0 0;color:var(--muted);font-size:12.5px;max-width:80ch}
 .link{background:none;border:0;color:var(--ink);text-decoration:underline;text-underline-offset:2px;cursor:pointer;font-size:12px;font-weight:500;padding:0;white-space:nowrap}
@@ -157,6 +158,8 @@ table.t{border-collapse:separate;border-spacing:0;width:100%;font-size:13px;min-
 .sbtn{flex:1;font-size:13px;font-weight:600;border-radius:999px;border:1px solid rgba(255,255,255,.35);background:transparent;color:var(--oncard);padding:10px 14px;cursor:pointer;white-space:nowrap}
 .sbtn.w{background:#fff;color:var(--ink);border-color:#fff}
 .sbtn:hover{border-color:#fff}.sbtn[disabled]{opacity:.4;cursor:default}
+.acc-b{border-style:dashed}.acc{border-radius:14px;padding:10px 14px;background:rgba(255,255,255,.1);display:flex;flex-direction:column;gap:2px}.acc b{font-size:13px}.acc small{font-size:12px;opacity:.7}
+td .badge{display:inline-block;margin-top:4px;font-size:11px;padding:2px 9px}.badge.okb{background:#0a0a0a;color:#fff}
 .side .note{font-size:11.5px;color:var(--oncard-mute);line-height:1.45}
 .mbar{display:none;justify-content:space-between;align-items:center;gap:10px;background:none;border:0;color:inherit;width:100%;text-align:left;padding:0;cursor:pointer}
 .mbar .tg{font-size:12px;border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:5px 12px}
@@ -234,6 +237,14 @@ table.t{border-collapse:separate;border-spacing:0;width:100%;font-size:13px;min-
 }
 @media (max-width:560px){.f-sys-s{display:none}.f-sys-t{font-size:19px}.f-mark{height:40px}.side .big{font-size:28px}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+.f-switch{display:inline-flex;align-items:center;gap:10px;padding:6px 16px 6px 6px;border-radius:999px;background:#0a0a0a;color:#fff;text-decoration:none;font-size:13px;font-weight:600;white-space:nowrap;margin-left:14px;position:relative;line-height:1.15;flex:none}
+.f-switch::before{content:"";position:absolute;left:-14px;top:4px;bottom:4px;width:1px;background:#d2d2d2}
+.f-switch:hover{opacity:.88}
+.f-switch .sw-ic{width:30px;height:30px;border-radius:50%;background:#fff;color:#0a0a0a;display:flex;align-items:center;justify-content:center;flex:none}
+.f-switch .sw-ic svg{width:14px;height:14px}
+.f-switch small{display:block;font-size:9.5px;font-weight:500;color:#a6a6a6;letter-spacing:.09em;text-transform:uppercase;margin-bottom:1px}
+@media (max-width:720px){.f-switch{width:100%;margin-left:0}.f-switch::before{display:none}}
 </style>
 </head>
 <body>
@@ -242,6 +253,7 @@ table.t{border-collapse:separate;border-spacing:0;width:100%;font-size:13px;min-
   <div class="f-lock"><span class="f-mark"><img src="firma.png" alt="Agência Firma"></span>
     <span class="f-sys"><span class="f-sys-t">Precificação de projetos</span><span class="f-sys-s" id="sub">Composição de escopo, margem real e proposta oficial</span></span></div>
   <nav class="f-act" id="act" aria-label="Ações"></nav>
+  <a class="f-switch" href="https://guilhermefirma.github.io/firma-oportunidades/" title="Abrir Menu de oportunidades"><span class="sw-ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 11 11 5M6 5h5v5"/></svg></span><span><small>Outro sistema</small>Menu de oportunidades</span></a>
 </div></header>
 
 <div class="in">
@@ -281,6 +293,7 @@ table.t{border-collapse:separate;border-spacing:0;width:100%;font-size:13px;min-
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <script>
 'use strict';
 /* ---------- configuração ---------- */
@@ -301,6 +314,7 @@ const REF = [["Anúncio até 1/4 de página",1478],["Anúncio até 1/2 página",
 const DEF = {reajuste: 4.62, reajusteNota: 'IPCA-15 acumulado em 12 meses (out/2026)', descPadrao: 60, imposto: 20, custoOp: 20, custoDir: 10, arred: 10,
   validade: 15, meses: 12, mostrarRef: true, pagamento: '',
   fonte: 'Sinapro-SC, Valores Referenciais de Serviços Internos nº 42, vigente desde 01/04/2025',
+  assinante: 'Vitor Horvat', assinanteCargo: '',
   ressalva: 'Produção de terceiros (filmagem, fotografia, gravação), verba de mídia, cachês de influenciadores, licenças e ferramentas são orçados à parte.'};
 
 /* ---------- utilidades ---------- */
@@ -331,19 +345,23 @@ function sbDb(){
     async put(tb, id, d){ const x = Object.assign({}, d); delete x.id; const {error} = await sb.from(tb).upsert({id, data: x}); if (error) throw error; },
     async add(tb, d){ const x = Object.assign({}, d); delete x.id; const {data, error} = await sb.from(tb).insert({data: x}).select('id').single(); if (error) throw error; return data.id; },
     async del(tb, id){ const {error} = await sb.from(tb).delete().eq('id', id); if (error) throw error; },
-    async logo(path){ const {data} = await sb.storage.from('logos').createSignedUrl(path, 3600); return data ? data.signedUrl : null; }
+    async logo(path){ const {data} = await sb.storage.from('logos').createSignedUrl(path, 3600); return data ? data.signedUrl : null; },
+    async share(id, d){ const {error} = await sb.from('pricing_shares').upsert({id, data: d}); if (error) throw error; },
+    async accepts(){ const {data, error} = await sb.from('pricing_shares').select('id,accepted').not('accepted', 'is', null); if (error) throw error; return data || []; }
   };
 }
 function memDb(seed){ const T = clone(seed);
   return { async all(tb){ return clone(T[tb]||[]); }, async put(tb, id, d){ T[tb] = T[tb]||[]; const i = T[tb].findIndex(r => r.id === id); const r = Object.assign(clone(d), {id}); if (i < 0) T[tb].push(r); else T[tb][i] = r; },
-    async add(tb, d){ const id = uid(); await this.put(tb, id, d); return id; }, async del(tb, id){ T[tb] = (T[tb]||[]).filter(r => r.id !== id); }, async logo(){ return null; } };
+    async add(tb, d){ const id = uid(); await this.put(tb, id, d); return id; }, async del(tb, id){ T[tb] = (T[tb]||[]).filter(r => r.id !== id); }, async logo(){ return null; },
+    async share(id, d){ T.__sh = T.__sh || {}; T.__sh[id] = d; }, async accepts(){ return clone(T.__acc || []); } };
 }
 
 /* ---------- estado ---------- */
-let CAT = [], SET = clone(DEF), CLIENTS = [], PROPS = [], PRESETS = [], OPPCAT = [], CBOPTS = [], cbIdx = 0, P = null, view = 'comp', seg = 'contrato', openF = new Set(['growth']), ready = false, denied = false, offline = false, dirty = false, sideOpen = false;
+let SHARES = {}; const ACEITE = 'https://guilhermefirma.github.io/precificacao-projetos/aceite/';
+let CAT = [], SET = clone(DEF), CLIENTS = [], PROPS = [], PRESETS = [], OPPCAT = [], CBOPTS = [], cbIdx = 0, P = null, view = 'comp', seg = 'mensal', openF = new Set(['growth']), ready = false, denied = false, offline = false, dirty = false, sideOpen = false;
 function newProp(){ return {id: null, number: '', client: '', project: '', contact: '', date: todayISO(), validade: SET.validade, meses: SET.meses, pagamento: SET.pagamento || '', obs: '',
   descExtra: 0, mostrarRef: SET.mostrarRef !== false, params: paramsFrom(SET), items: {}, order: []}; }
-function paramsFrom(s){ return {reajuste: +s.reajuste||0, reajusteNota: s.reajusteNota||'', descPadrao: +s.descPadrao||0, imposto: +s.imposto||0, custoOp: +s.custoOp||0, custoDir: +s.custoDir||0, arred: +s.arred||0, fonte: s.fonte||'', ressalva: s.ressalva||''}; }
+function paramsFrom(s){ return {reajuste: +s.reajuste||0, reajusteNota: s.reajusteNota||'', descPadrao: +s.descPadrao||0, imposto: +s.imposto||0, custoOp: +s.custoOp||0, custoDir: +s.custoDir||0, arred: +s.arred||0, fonte: s.fonte||'', ressalva: s.ressalva||'', assinante: s.assinante == null ? 'Vitor Horvat' : s.assinante, assinanteCargo: s.assinanteCargo||''}; }
 function snap(it){ return {code: it.code, front: it.front, name: it.name, desc: it.desc, rec: it.rec, unit: it.unit, ref: +it.ref||0, basis: it.basis||[], parts: it.parts && it.parts.length ? clone(it.parts) : undefined}; }
 function saveDraft(){ try { sessionStorage.setItem('pp-draft', JSON.stringify(P)); } catch(_) {} }
 function markDirty(){ dirty = true; saveDraft(); const st = $('pst'); if (st) st.textContent = 'Alterações não salvas'; }
@@ -359,8 +377,8 @@ function calc(p){
   const codes = (p.order||[]).filter(c => p.items[c]).concat(Object.keys(p.items).filter(c => !(p.order||[]).includes(c)));
   const L = [];
   const mk = (it, sel, tabela) => {
-    const afterStd = tabela*std, pre = afterStd*ex*(1 - (+sel.desc||0)/100), price = tabela > 0 ? roundUp(pre, s.arred) : 0;
-    return {code: it.code, it, sel, qty: +sel.qty||0, desc: +sel.desc||0, rec: it.rec, tabela, std: tabela - afterStd, extra: afterStd - pre, round: price - pre, price,
+    const fx = +sel.fixed > 0 ? +sel.fixed : 0, afterStd = tabela*std, pre = fx || afterStd*ex*(1 - (+sel.desc||0)/100), price = fx ? fx : (tabela > 0 ? roundUp(pre, s.arred) : 0);
+    return {code: it.code, it, sel, fixed: !!fx, qty: +sel.qty||0, desc: +sel.desc||0, rec: it.rec, tabela, std: tabela - afterStd, extra: afterStd - pre, round: price - pre, price,
       imp: price*s.imposto/100, op: price*s.custoOp/100, dir: price*s.custoDir/100, mg: price*(1 - ded), unitRef: it.ref*rj};
   };
   codes.forEach(c => { const sel = p.items[c], it = sel.snap; if (it.unit !== 'pct') L.push(mk(it, sel, (hasParts(it) ? partsRef(it, sel.parts) : it.ref)*rj*(+sel.qty||0))); });
@@ -418,7 +436,6 @@ function renderActs(){
   const a = $('act'); if (!ready) { a.innerHTML = me ? '<button class="f-btn" id="b-out">Sair</button>' : ''; return; }
   a.innerHTML = `<button class="f-btn" data-a="new">${ICON.plus}Nova proposta</button>
     <button class="f-btn" data-a="params">Parâmetros</button>
-    <a class="f-btn" href="${OPP}">Menu de oportunidades</a>
     <button class="f-btn" id="b-out">Sair</button>`;
 }
 function renderTabs(){
@@ -432,7 +449,7 @@ function viewComp(){
   const info = `<section class="card">
     <div class="bar" style="margin:0"><h2>${P.id ? 'Proposta ' + esc(P.number) : 'Nova proposta'}</h2><span class="st" id="pst">${dirty ? 'Alterações não salvas' : (P.id ? 'Salva' : 'Ainda não salva')}</span></div>
     <div class="grid">
-      <label class="fl s3">Cliente<input data-f="client" list="dl-cli" value="${esc(P.client)}" placeholder="Nome do cliente" autocomplete="off"><datalist id="dl-cli">${cl}</datalist></label>
+      <label class="fl s3">Cliente<input data-f="client" value="${esc(P.client)}" placeholder="Nome do cliente" autocomplete="off"></label>
       <label class="fl s3">Projeto<input data-f="project" value="${esc(P.project)}" placeholder="Nome do projeto"></label>
       <label class="fl s2">Contato do cliente<input data-f="contact" value="${esc(P.contact)}" placeholder="Nome e cargo"></label>
       <label class="fl">Data<input data-f="date" type="date" value="${esc(P.date)}"></label>
@@ -455,6 +472,7 @@ function viewComp(){
   return `<div class="layout"><div class="col">${info}
     <div class="bar"><h2>Escopo</h2><span class="st">Digite, escolha um projeto de referência ou marque os itens. Preços com o desconto padrão de ${PCT(P.params.descPadrao/100)}.</span></div>
     <div class="cb" id="cb"><svg class="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="7" cy="7" r="4.8"/><path d="M10.6 10.6 14 14"/></svg><input id="q" type="search" placeholder="Digite um item do escopo ou um projeto de referência" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="cbl" aria-autocomplete="list"><div class="cbl" id="cbl" role="listbox" hidden></div></div>
+    ${bestHTML()}
     ${fr}<div id="disc" class="col">${disc}</div></div><aside class="side${sideOpen ? ' open' : ''}" id="side">${sideHTML(T)}</aside></div>`;
 }
 function frontBadge(k, T, total){
@@ -474,7 +492,8 @@ function itemCard(it){
       return `<div class="pt${q ? ' on' : ''}"><label><input type="checkbox" data-pc="${k}" ${q ? 'checked' : ''}><span>${esc(pt.name)}</span></label><span class="pq"><input data-pq="${k}" inputmode="decimal" value="${fmtIn(q || pt.qty || 1)}" ${q ? '' : 'disabled'}> ${esc(pt.unit || '')}</span><span class="pv">${BRL(roundUp(pt.ref*(1 + s.reajuste/100)*(1 - s.descPadrao/100)*(1 - (+P.descExtra||0)/100), s.arred))}</span></div>`; }).join('')}</div>` : '';
     ctl = `${parts}<div class="ctl" data-stop="1">
       ${hasParts(sp) ? '' : `<label>${pct ? 'Percentual' : 'Qtd.'}<input data-q="${esc(it.code)}" inputmode="decimal" value="${fmtIn(sel.qty)}"> ${pct ? '%' : esc(unitLabel(it, sel.qty))}</label>`}
-      <label>Desc. extra<input data-d="${esc(it.code)}" inputmode="decimal" value="${fmtIn(sel.desc||0)}">%</label>
+      <label>Desc. extra<input data-d="${esc(it.code)}" inputmode="decimal" value="${fmtIn(sel.desc||0)}" ${+sel.fixed > 0 ? 'disabled' : ''}>%</label>
+      <label>Preço fechado R$<input data-fx="${esc(it.code)}" inputmode="decimal" value="${+sel.fixed > 0 ? fmtIn(sel.fixed) : ''}" placeholder="auto" style="width:84px"></label>
       <button class="link" data-basis="${esc(it.code)}">Referência</button>
       <span class="lt">${L ? BRL(L.price) + (it.rec === 'mensal' ? '/mês' : '') : ''}</span></div>`; }
   return `<div class="it${sel ? ' sel' : ''}${sel && hasParts(it) ? ' wide' : ''}" data-it="${esc(it.code)}" role="checkbox" aria-checked="${!!sel}" tabindex="0">
@@ -482,6 +501,9 @@ function itemCard(it){
     <span class="w">${esc(it.desc)}</span>
     <span class="tag${it.rec === 'mensal' ? ' m' : ''}">${it.rec === 'mensal' ? 'Mensal' : 'Único'}</span>${ctl}</div>`;
 }
+function accHTML(T){ const a = P.share && SHARES[P.share];
+  if (a) return `<div class="acc ok"><b>Aprovada por ${esc(a.name)}</b><small>${esc(dtBR(a.at))}${a.email ? ' · ' + esc(a.email) : ''}</small></div>`;
+  return `<button class="sbtn acc-b" data-a="share" ${T.contrato.n ? '' : 'disabled'} style="flex:none">${P.share ? 'Copiar link de aceite' : 'Gerar link de aceite do cliente'}</button>`; }
 function sideHTML(T){
   const s = P.params, t = T[seg], ded = s.imposto + s.custoOp + s.custoDir;
   const lbl = {contrato: 'Valor do contrato', mensal: 'Mensalidade', unico: 'Itens únicos'}[seg];
@@ -490,7 +512,7 @@ function sideHTML(T){
   const effd = t.tabela ? 1 - t.price/t.tabela : 0, mgp = t.price ? t.mg/t.price : 0;
   const row = (l, v, cls, sub) => `<div class="brl ${cls||''}"><span>${l}</span><b>${v}${sub ? `<span class="sub">${sub}</span>` : ''}</b></div>`;
   const mb = `<button class="mbar" id="mbar"><div><small>${esc(lbl)}</small><b>${BRL(t.price)}</b></div><span class="tg">${sideOpen ? 'Fechar' : 'Detalhar'}</span></button>`;
-  return `${mb}<div class="seg" role="group" aria-label="Visão">${[['contrato','Contrato'],['mensal','Mensal'],['unico','Único']].map(([k,l]) => `<button data-seg="${k}" aria-pressed="${seg === k}">${l}</button>`).join('')}</div>
+  return `${mb}<div class="seg" role="group" aria-label="Visão">${[['mensal','Mensal'],['contrato','Contrato'],['unico','Único']].map(([k,l]) => `<button data-seg="${k}" aria-pressed="${seg === k}">${l}</button>`).join('')}</div>
     <div class="more"><div><div class="eb">Preço ao cliente · ${esc(lbl)}</div><div class="big">${BRL(t.price)}${suf}</div></div><div class="sn">${esc(sn)}</div>
     <div class="br">
       ${row('Tabela referencial', BRL(t.tabela))}
@@ -505,12 +527,13 @@ function sideHTML(T){
     </div>
     <div class="dx"><label for="dx">Desconto adicional na proposta inteira</label><span style="white-space:nowrap"><input id="dx" inputmode="decimal" value="${fmtIn(P.descExtra||0)}"> %</span></div>
     <div class="sacts"><button class="sbtn w" data-a="save">Salvar</button><button class="sbtn" data-a="pdf" ${T.contrato.n ? '' : 'disabled'}>Exportar proposta</button></div>
+    ${accHTML(T)}
     <button class="sbtn" data-a="preset" ${T.contrato.n ? '' : 'disabled'} style="flex:none">Salvar como projeto de referência</button>
     <div class="note">Custos sobre o preço ao cliente (soma ${PCT(ded/100)}). Tabela: ${esc(s.fonte)}, atualizada em ${PCT2(s.reajuste/100)} (${esc(s.reajusteNota)}). Uso interno, não sai na proposta.</div></div>`;
 }
 function discTable(T){
   if (!T.lines.length) return '<div class="empty"><b>Nenhum item marcado</b>Abra uma frente e marque os itens do escopo. O preço ao cliente e a margem aparecem no card preto.</div>';
-  const r = (l) => `<tr><td class="l">${esc(l.it.name)}<small>${esc(frontName(l.it.front))} · ${l.rec === 'mensal' ? 'mensal' : 'único'}${hasParts(l.it) ? ' · ' + esc(partsText(l.it, l.sel.parts)) : ''}</small></td>
+  const r = (l) => `<tr><td class="l">${esc(l.it.name)}<small>${esc(frontName(l.it.front))} · ${l.rec === 'mensal' ? 'mensal' : 'único'}${hasParts(l.it) ? ' · ' + esc(partsText(l.it, l.sel.parts)) : ''}${l.fixed ? ' · preço fechado' : ''}</small></td>
     <td>${l.it.unit === 'pct' ? fmtIn(l.qty) + '%' : fmtIn(l.qty) + ' ' + esc(unitLabel(l.it, l.qty))}</td><td>${BRL(l.tabela)}</td><td>${PCT(l.tabela ? 1 - l.price/l.tabela : 0)}</td><td><b>${BRL(l.price)}</b></td>
     <td class="neg">${BRL(-l.imp)}</td><td class="neg">${BRL(-(l.op + l.dir))}</td><td class="${l.mg < 0 ? 'neg' : 'pos'}"><b>${BRL(l.mg)}</b></td></tr>`;
   const sumRow = (lbl, t) => t.n ? `<tr class="sum"><td class="l">${lbl}</td><td></td><td>${BRL(t.tabela)}</td><td>${PCT(t.tabela ? 1 - t.price/t.tabela : 0)}</td><td>${BRL(t.price)}</td><td class="neg">${BRL(-t.imp)}</td><td class="neg">${BRL(-(t.op + t.dir))}</td><td class="pos">${BRL(t.mg)}</td></tr>` : '';
@@ -524,7 +547,7 @@ function syncPad(){ const sd = $('side'); if (!sd) return; document.body.style.p
 function viewProps(){
   if (!PROPS.length) return '<div class="empty"><b>Nenhuma proposta salva</b>Monte o escopo na aba Composição e clique em Salvar.</div>';
   const rows = PROPS.slice().sort((a,b) => String(b.number).localeCompare(String(a.number))).map(p => { const T = calc(p);
-    return `<tr><td class="l"><b>${esc(p.number)}</b><small>${dBR(p.date)}</small></td><td class="l">${esc(p.client)}<small>${esc(p.project)}</small></td>
+    return `<tr><td class="l"><b>${esc(p.number)}</b><small>${dBR(p.date)}</small>${p.share && SHARES[p.share] ? '<span class="badge okb">Aprovada</span>' : p.share ? '<span class="badge">Aguardando aceite</span>' : ''}</td><td class="l">${esc(p.client)}<small>${esc(p.project)}</small></td>
       <td>${T.mensal.n ? BRL(T.mensal.price) + '/mês' : ''}</td><td>${T.unico.n ? BRL(T.unico.price) : ''}</td><td>${BRL(T.contrato.price)}</td><td class="pos">${BRL(T.contrato.mg)}<small style="display:block;color:var(--muted)">${T.contrato.price ? PCT(T.contrato.mg/T.contrato.price) : ''}</small></td>
       <td><div class="acts"><button class="mini" data-open="${p.id}">Abrir</button><button class="mini" data-ppdf="${p.id}">PDF</button><button class="mini" data-dup="${p.id}">Duplicar</button><button class="mini del" data-pdel="${p.id}">Excluir</button></div></td></tr>`; }).join('');
   return `<div class="bar" style="margin-bottom:12px"><h2>Propostas salvas</h2><span class="st">Valores com os parâmetros gravados em cada proposta</span></div>
@@ -543,6 +566,51 @@ function viewCat(){
     <div class="bar" style="margin:28px 0 12px"><h2>Projetos de referência</h2><span class="st">Escopos montados a partir de contratos. Aparecem no menu de busca da composição.</span></div>
     <div class="col">${PRESETS.length ? PRESETS.map(pr => `<div class="pre"><div><b>${esc(pr.name)}</b><p>${esc(pr.desc || '')}</p><p>${(pr.items||[]).map(x => { const c = CAT.find(k => k.code === x.code); return esc((c ? c.name : x.code) + (x.qty && x.qty !== 1 ? ' (' + fmtIn(x.qty) + ')' : '')); }).join(' · ')}</p></div>
       <div class="acts" style="display:flex;gap:6px;align-items:center"><span class="badge">${esc(presetLabel(pr))}</span><button class="mini" data-papply="${esc(pr.id)}">Aplicar</button><button class="mini del" data-predel="${esc(pr.id)}">Excluir</button></div></div>`).join('') : '<div class="empty"><b>Nenhum projeto de referência</b>Monte uma composição e use Salvar como projeto de referência.</div>'}</div>`;
+}
+
+/* ---------- escopos mais vendidos ---------- */
+const BEST = [
+  {opp: 'O4', code: 'CM07', parts: {ig: 12, st: 8}},
+  {opp: 'O3', code: 'CM08'},
+  {opp: 'T1', code: 'GP10', parts: {meta: 1, rel: 1}},
+  {opp: 'T2', code: 'GP10', parts: {ggl: 1, rel: 1}},
+  {opp: 'T3', code: 'GP10', parts: {ias: 1, rel: 1}},
+  {opp: 'SDR', code: 'LS10'},
+  {opp: 'O5', code: 'LS07'},
+  {opp: 'O1', code: 'LS08', qty: 4},
+  {opp: 'O2', code: 'GP07'},
+  {opp: 'O7', code: 'CM06', qty: 8},
+  {opp: 'A1', code: 'LS03'}
+];
+function bestRows(){
+  const s = P.params, rj = 1 + s.reajuste/100, std = 1 - s.descPadrao/100;
+  return BEST.map((b, i) => { const o = OPPCAT.find(x => x.id === b.opp), it = CAT.find(c => c.code === b.code); if (!o || !it) return null;
+    const parts = hasParts(it) ? (b.parts ? b.parts : partDefaults(it)) : null, qty = b.qty || (hasParts(it) ? 1 : +it.qty || 1);
+    const tab = (parts ? partsRef(it, parts) : it.ref) * qty * rj, sug = roundUp(tab*std, s.arred);
+    const mensal = +o.price > 0, prat = mensal ? +o.price : +o.setup || 0, setup = mensal ? +o.setup || 0 : 0;
+    const n = CLIENTS.filter(c => c.items && c.items[b.opp] && c.items[b.opp].s === 'tem').length;
+    return {i, b, o, it, parts, qty, tab, sug, prat, setup, mensal, n, what: o.what || ''};
+  }).filter(Boolean).sort((a, b) => b.n - a.n || b.prat - a.prat);
+}
+function bestHTML(){
+  const R = bestRows(); if (!R.length) return '';
+  const per = r => r.mensal ? '/mês' : '';
+  return `<section class="card best"><div class="bar" style="margin:0 0 10px"><div><span class="eb">Escopos mais vendidos</span><h2 style="margin-top:4px">O que a FIRMA vende hoje</h2></div><span class="st">Preço praticado nos contratos ao lado da tabela de referência e do sugerido com ${PCT(P.params.descPadrao/100)} de desconto</span></div>
+    <div class="tw"><table class="t"><thead><tr><th class="l">Escopo</th><th>Clientes</th><th>Praticado FIRMA</th><th>Tabela</th><th>Sugerido</th><th>Espaço até o sugerido</th><th></th></tr></thead><tbody>
+    ${R.map(r => { const gap = r.sug - r.prat, gp = r.sug ? gap / r.sug : 0;
+      return `<tr><td class="l"><b>${esc(r.o.name)}</b><small>${esc(r.what)}</small></td><td>${r.n || '·'}</td>
+        <td><b>${BRL(r.prat)}${per(r)}</b>${r.setup ? `<small style="display:block;color:var(--muted)">+ ${BRL(r.setup)} implantação</small>` : ''}</td>
+        <td>${BRL(r.tab)}${per(r)}</td><td>${BRL(r.sug)}${per(r)}</td>
+        <td class="${gap > 0 ? '' : 'pos'}">${gap > 0 ? '+' + BRL(gap) + `<small style="display:block;color:var(--muted)">${PCT(gp)} acima do praticado</small>` : 'No sugerido ou acima'}</td>
+        <td><div class="acts"><button class="mini" data-best="${r.i}" data-bmode="sug">+ Sugerido</button><button class="mini" data-best="${r.i}" data-bmode="prat">+ Praticado</button></div></td></tr>`; }).join('')}
+    </tbody></table></div><p class="note-best">Praticado: preços atuais do cardápio do Menu de oportunidades. Clientes: quantos clientes ativos já têm o serviço no escopo. "+ Praticado" inclui o item com o preço fechado no valor praticado.</p></section>`;
+}
+function addBest(i, mode){
+  const r = bestRows().find(x => x.i === i); if (!r) return; const it = r.it, c = it.code;
+  if (!P.items[c]) { P.items[c] = {qty: r.qty, desc: 0, snap: snap(it), parts: r.parts ? clone(r.parts) : undefined}; (P.order = P.order||[]).push(c); if (mode === 'prat') P.items[c].fixed = r.prat; }
+  else { const sl = P.items[c]; if (r.parts) { sl.parts = sl.parts || {}; Object.entries(r.parts).forEach(([k, v]) => { sl.parts[k] = Math.max(+sl.parts[k] || 0, v); }); } else sl.qty = r.qty;
+    if (mode === 'prat') sl.fixed = (+sl.fixed || 0) + r.prat; }
+  openF.add(it.front); markDirty(); render(); toast(r.o.name + ' incluído no escopo' + (mode === 'prat' ? ' com o preço praticado.' : ' com o preço sugerido.'));
 }
 
 /* ---------- busca do escopo ---------- */
@@ -613,6 +681,7 @@ function paramsModal(){
       <div class="g3">${f('imposto','Impostos (%)')}${f('custoOp','Custo operacional (%)')}${f('custoDir','Custo direto: equipe e atendimento (%)')}</div>
       <label class="fl">Tabela de referência<input name="fonte" value="${esc(s.fonte)}"></label>
       <label class="fl">Ressalva na proposta<textarea name="ressalva">${esc(s.ressalva)}</textarea></label>
+      <div class="g3"><label class="fl">Assinatura da FIRMA na proposta<input name="assinante" value="${esc(s.assinante||'')}"></label><label class="fl">Cargo de quem assina<input name="assinanteCargo" value="${esc(s.assinanteCargo||'')}" placeholder="opcional"></label></div>
       <label class="chk"><input type="checkbox" name="padrao" checked><span>Usar como padrão nas próximas propostas</span></label>
       <div class="err" id="par-err"></div>
       <div class="acts"><button type="button" class="f-btn" data-close="1">Cancelar</button><button class="f-btn pri" type="submit">Aplicar</button></div></form>`);
@@ -665,7 +734,7 @@ async function nextNumber(){
   const n = PROPS.map(p => String(p.number||'')).filter(s => s.startsWith(pre)).map(s => parseInt(s.slice(pre.length), 10) || 0);
   return pre + String((n.length ? Math.max(...n) : 0) + 1).padStart(3, '0');
 }
-async function saveProp(){
+async function saveProp(quiet){
   if (!P.client.trim() || !P.project.trim()) { toast('Preencha cliente e projeto antes de salvar.'); return false; }
   if (!Object.keys(P.items).length) { toast('Marque pelo menos um item.'); return false; }
   const T = calc(P); const d = clone(P); d.updatedAt = new Date().toISOString(); d.by = me && me.email;
@@ -673,7 +742,7 @@ async function saveProp(){
   try {
     if (!P.id) { P.number = d.number = await nextNumber(); d.createdAt = d.updatedAt; P.id = await DB.add('pricing_proposals', d); }
     else await DB.put('pricing_proposals', P.id, d);
-    PROPS = await DB.all('pricing_proposals'); dirty = false; saveDraft(); render(); toast('Proposta ' + P.number + ' salva.'); return true;
+    PROPS = await DB.all('pricing_proposals'); dirty = false; saveDraft(); render(); if (!quiet) toast('Proposta ' + P.number + ' salva.'); return true;
   } catch(e) { console.error(e); toast('Não foi possível salvar: ' + (e.message || 'erro no banco')); return false; }
 }
 function confirmBtn(btn, fn){ if (btn.classList.contains('ok')) { fn(); return; } btn.classList.add('ok'); const old = btn.textContent; btn.textContent = 'Confirmar'; setTimeout(() => { if (btn.isConnected) { btn.classList.remove('ok'); btn.textContent = old; } }, 3500); }
@@ -683,6 +752,7 @@ document.addEventListener('click', async e => {
   if (t.closest('#b-out')) { if (sb) await sb.auth.signOut(); try { sessionStorage.removeItem('pp-draft'); } catch(_) {} location.reload(); return; }
   if (t.id === 'ov' || t.closest('[data-close]')) { closeModal(); return; }
   const cbo = t.closest('[data-cbo]'); if (cbo) { pickCb(+cbo.dataset.cbo); return; }
+  const bst = t.closest('[data-best]'); if (bst) { addBest(+bst.dataset.best, bst.dataset.bmode); return; }
   if (!t.closest('#cb')) closeCb();
   const sgb = t.closest('[data-sg]'); if (sgb) { useSugg(+sgb.dataset.sg); return; }
   const pa = t.closest('[data-papply]'); if (pa) { const pr = PRESETS.find(x => x.id === pa.dataset.papply); if (pr) { view = 'comp'; applyPreset(pr); } return; }
@@ -694,6 +764,7 @@ document.addEventListener('click', async e => {
     else if (k === 'params') paramsModal();
     else if (k === 'save') saveProp();
     else if (k === 'pdf') exportPDF(a, P);
+    else if (k === 'share') copyShare(a);
     else if (k === 'cnew') catModal(null);
     else if (k === 'preset') presetModal();
     return; }
@@ -727,6 +798,7 @@ document.addEventListener('input', e => {
       if (t.checked) sl.parts[pid] = +pt.qty || 1; else delete sl.parts[pid]; markDirty(); render(); } return; }
   if (t.dataset.pq) { const [c, pid] = t.dataset.pq.split('|'), sl = P.items[c]; if (sl && sl.parts) { sl.parts[pid] = Math.max(0, numIn(t.value)); markDirty(); refreshNums(); } return; }
   if (t.dataset.q) { const s = P.items[t.dataset.q]; if (s) { s.qty = Math.max(0, numIn(t.value)); markDirty(); refreshNums(); } return; }
+  if (t.dataset.fx) { const s = P.items[t.dataset.fx]; if (s) { const v = numIn(t.value); if (v > 0) s.fixed = v; else delete s.fixed; markDirty(); refreshNums(); } return; }
   if (t.dataset.d) { const s = P.items[t.dataset.d]; if (s) { s.desc = Math.min(100, Math.max(0, numIn(t.value))); markDirty(); refreshNums(); } return; }
   if (t.id === 'dx') { P.descExtra = Math.min(100, Math.max(0, numIn(t.value))); markDirty(); refreshNums(); return; }
 });
@@ -739,7 +811,7 @@ document.addEventListener('submit', async e => {
   if (f.id === 'f-par') { const g = n => f.elements[n].value, s = P.params;
     ['descPadrao','reajuste','arred','imposto','custoOp','custoDir'].forEach(k => s[k] = Math.max(0, numIn(g(k))));
     if (s.descPadrao > 100 || s.imposto + s.custoOp + s.custoDir > 100) { $('par-err').textContent = 'Percentuais acima de 100% não fecham a conta.'; return; }
-    s.reajusteNota = g('reajusteNota'); s.fonte = g('fonte'); s.ressalva = g('ressalva'); markDirty();
+    s.reajusteNota = g('reajusteNota'); s.fonte = g('fonte'); s.ressalva = g('ressalva'); s.assinante = g('assinante').trim(); s.assinanteCargo = g('assinanteCargo').trim(); markDirty();
     if (f.elements.padrao.checked) { Object.assign(SET, clone(s)); try { await DB.put('pricing_settings', 'default', SET); } catch(err) { toast('Parâmetros aplicados, mas não foi possível gravar o padrão.'); } }
     closeModal(); render(); return; }
   if (f.id === 'f-pre') { const g = n => f.elements[n].value.trim(); if (!g('name')) { $('pre-err').textContent = 'Dê um nome.'; return; }
@@ -773,7 +845,42 @@ async function clientLogo(name){
   let src = c.logo; if (src.startsWith('st:')) src = await DB.logo(src.slice(3)); else if (!/^(data:|https?:)/.test(src)) src = OPP + src;
   return imgData(src);
 }
-async function buildPDF(p){
+/* ---------- aceite online ---------- */
+async function loadAccepts(){ try { SHARES = {}; (await DB.accepts()).forEach(r => { if (r.accepted) SHARES[r.id] = r.accepted; }); } catch(_) {} }
+const dtBR = iso => { try { return new Date(iso).toLocaleString('pt-BR', {timeZone: 'America/Sao_Paulo', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'}).replace(',', ' às'); } catch(_) { return ''; } };
+function qtyLabel(l){ return hasParts(l.it) ? (l.rec === 'mensal' ? 'Mensal' : 'Projeto') : l.it.unit === 'pct' ? 'Gestão do projeto' : (l.it.unit === 'mês' || l.it.unit === 'projeto') && l.qty === 1 ? (l.rec === 'mensal' ? 'Mensal' : 'Projeto') : fmtIn(l.qty) + ' ' + unitLabel(l.it, l.qty) + (l.rec === 'mensal' ? ' por mês' : ''); }
+function lineDesc(l){ return (l.it.desc || '') + (hasParts(l.it) ? ' Inclui: ' + partsText(l.it, l.sel.parts) + '.' : ''); }
+function propConds(p, T){ const s = p.params, val = p.validade ? dBR(addDays(p.date, p.validade)) : '', cond = [];
+  if (val) cond.push(['Validade', 'Proposta válida por ' + p.validade + ' dias, até ' + val + '.']);
+  if (T.mensal.n && T.meses) cond.push(['Prazo', 'Itens mensais contratados por ' + T.meses + (T.meses === 1 ? ' mês' : ' meses') + ' a partir do início do projeto.']);
+  if ((p.pagamento||'').trim()) cond.push(['Pagamento', p.pagamento.trim()]);
+  if ((s.ressalva||'').trim()) cond.push(['Não incluso', s.ressalva.trim()]);
+  if ((p.obs||'').trim()) cond.push(['Observações', p.obs.trim()]);
+  if (p.mostrarRef) cond.push(['Referência', 'Valores de referência: ' + s.fonte + ', atualizados em ' + PCT2(s.reajuste/100) + ' (' + s.reajusteNota + ').']);
+  return cond; }
+function shareSnap(p){ const T = calc(p), s = p.params;
+  return {number: p.number || '', client: p.client, project: p.project, contact: p.contact || '', date: p.date, validUntil: p.validade ? addDays(p.date, p.validade) : null,
+    mensal: T.mensal.n ? T.mensal.price : 0, unico: T.unico.n ? T.unico.price : 0,
+    ref: p.mostrarRef ? {tabela: T.mensal.n ? T.mensal.tabela : T.unico.tabela, mensal: !!T.mensal.n} : null,
+    fronts: FRONTS.map(([k, nm]) => ({name: nm, lines: T.lines.filter(l => l.it.front === k).map(l => ({name: l.it.name, desc: lineDesc(l), q: qtyLabel(l), price: l.price, rec: l.rec}))})).filter(f => f.lines.length),
+    cond: propConds(p, T), signer: {name: s.assinante || '', role: s.assinanteCargo || ''}, updatedAt: new Date().toISOString()}; }
+const newToken = () => { const a = new Uint8Array(18); crypto.getRandomValues(a); return Array.from(a, b => b.toString(16).padStart(2, '0')).join(''); };
+async function ensureShare(p){
+  if (!p.share) { p.share = newToken(); if (p === P) { const ok = await saveProp(true); if (!ok) { p.share = null; return null; } } else await DB.put('pricing_proposals', p.id, p); }
+  if (!SHARES[p.share]) await DB.share(p.share, shareSnap(p));
+  return ACEITE + '?t=' + p.share; }
+async function copyShare(btn){
+  if (!P.client.trim() || !P.project.trim()) { toast('Preencha cliente e projeto para gerar o link.'); return; }
+  if (dirty || !P.id) { const ok = await saveProp(true); if (!ok) return; }
+  btn.disabled = true;
+  try { const url = await ensureShare(P); if (!url) return; try { await navigator.clipboard.writeText(url); toast('Link de aceite copiado. Envie ao cliente junto com o PDF.'); } catch(_) { prompt('Copie o link de aceite:', url); } render(); }
+  catch(e) { console.error(e); toast('Não foi possível gerar o link de aceite.'); }
+  finally { if (btn.isConnected) btn.disabled = false; } }
+function qrDraw(doc, text, x, y, size){ if (!window.qrcode) return false; const q = qrcode(0, 'M'); q.addData(text); q.make(); const n = q.getModuleCount(), c = size/n;
+  doc.setFillColor(10,10,10); for (let r = 0; r < n; r++) for (let k = 0; k < n; k++) if (q.isDark(r, k)) doc.rect(x + k*c, y + r*c, c + .02, c + .02, 'F'); return true; }
+
+async function buildPDF(p, ex){
+  ex = ex || {};
   const {jsPDF} = window.jspdf, doc = new jsPDF({unit: 'mm', format: 'a4'}), T = calc(p), s = p.params;
   const W = 210, H = 297, M = 18, CW = W - 2*M, BOT = 270;
   const flogo = await imgData('firma.png'), clogo = await clientLogo(p.client);
@@ -794,49 +901,73 @@ async function buildPDF(p){
   if (clogo) { const [w,h] = fit(clogo, 44, 20); doc.addImage(clogo.data, 'PNG', W - M - w, 40, w, h); y = Math.max(y, 40 + h + 4); }
   y += 4;
   // Investimento
-  const cols = []; if (T.mensal.n) cols.push(['INVESTIMENTO MENSAL', BRL2(T.mensal.price), 'por mês' + (T.meses ? ', por ' + T.meses + (T.meses === 1 ? ' mês' : ' meses') : '')]);
+  const cols = []; if (T.mensal.n) cols.push(['INVESTIMENTO MENSAL', BRL2(T.mensal.price), 'por mês']);
   if (T.unico.n) cols.push(['PROJETOS E ENTREGAS ÚNICAS', BRL2(T.unico.price), 'valor único']);
-  if (T.mensal.n && T.unico.n && T.meses || (T.mensal.n && T.meses > 1)) cols.push(['VALOR TOTAL DO CONTRATO', BRL2(T.contrato.price), T.meses ? T.meses + (T.meses === 1 ? ' mês' : ' meses') : '']);
   const bh = p.mostrarRef ? 44 : 34; doc.setFillColor(10,10,10); doc.roundedRect(M, y, CW, bh, 5, 5, 'F');
   const cw = CW / Math.max(1, cols.length);
   cols.forEach(([l, v, sub], i) => { const x = M + 8 + i*cw; F('bold', 7); grey(); doc.text(l, x, y + 10); F('bold', cols.length > 2 ? 15 : 19); white(); doc.text(v, x, y + 20); F('normal', 8); grey(); doc.text(sub, x, y + 26); });
-  if (p.mostrarRef) { const t = T.contrato.tabela ? T.contrato : T.unico; const save = t.tabela - t.price;
+  if (p.mostrarRef) { const t = T.mensal.n ? T.mensal : T.unico, sf = T.mensal.n ? '/mês' : ''; const save = t.tabela - t.price;
     doc.setDrawColor(60,60,60); doc.line(M + 8, y + 31, W - M - 8, y + 31);
-    F('normal', 8.5); grey(); doc.text('Referência de mercado (tabela Sinapro): ' + BRL2(t.tabela) + '   ·   Desconto FIRMA: ' + PCT(t.tabela ? save/t.tabela : 0) + ' (' + BRL2(save) + ')', M + 8, y + 38); }
+    F('normal', 8.5); grey(); doc.text('Valor de mercado (tabela Sinapro): ' + BRL2(t.tabela) + sf + '   ·   Condição FIRMA: ' + PCT(t.tabela ? save/t.tabela : 0) + ' abaixo do mercado', M + 8, y + 38); }
   y += bh + 12;
+  // Por que a FIRMA
+  const WHY = [['13 anos e mais de 500 projetos', 'Experiência acumulada com marcas de diferentes setores, do varejo à indústria, da saúde ao agro.'],
+    ['Um só time de marketing, tecnologia e IA', 'A FIRMA atua como o departamento de marketing, tech e IA da sua empresa, com estratégia, criação, mídia e dados no mesmo lugar.'],
+    ['Método DATA FIRMA', 'Medimos a maturidade digital da marca no início e acompanhamos a evolução com números, não com impressões.'],
+    ['Lideranças obcecadas pelo seu resultado', 'Cada frente é comandada por especialistas que respondem por metas, sob a mesma cultura de compromisso.']];
+  need(60); F('bold', 12); ink(); doc.text('Por que a FIRMA', M, y); y += 6;
+  const gw = (CW - 6) / 2; let maxh = 0;
+  WHY.forEach(([h, d], i) => { const col = i % 2, x = M + col*(gw + 6); if (col === 0 && i) { y += maxh + 4; maxh = 0; }
+    F('normal', 8.5); const dl = doc.splitTextToSize(d, gw - 12); const hh = 12 + dl.length*3.9 + 4; maxh = Math.max(maxh, hh);
+    doc.setFillColor(244,244,244); doc.roundedRect(x, y, gw, hh, 3, 3, 'F'); F('bold', 9.5); ink(); doc.text(h, x + 6, y + 8); F('normal', 8.5); doc.setTextColor(61,61,61); doc.text(dl, x + 6, y + 13.5); });
+  y += maxh + 12;
   // Escopo
   F('bold', 12); ink(); doc.text('Escopo da proposta', M, y); y += 8;
   const xQ = W - M - 62, xV = W - M;
   FRONTS.forEach(([k, nm]) => { const ls = T.lines.filter(l => l.it.front === k); if (!ls.length) return;
     need(20); F('bold', 7.5); mute(); doc.text(nm.toUpperCase(), M, y); doc.setDrawColor(10,10,10); doc.setLineWidth(.4); doc.line(M, y + 2, W - M, y + 2); doc.setLineWidth(.2); y += 8;
-    ls.forEach(l => { F('normal', 8.5); const dl = doc.splitTextToSize((l.it.desc || '') + (hasParts(l.it) ? ' Inclui: ' + partsText(l.it, l.sel.parts) + '.' : ''), xQ - M - 6); const nl = doc.splitTextToSize(l.it.name, xQ - M - 6);
+    ls.forEach(l => { F('normal', 8.5); const dl = doc.splitTextToSize(lineDesc(l), xQ - M - 6); const nl = doc.splitTextToSize(l.it.name, xQ - M - 6);
       const h = Math.max(nl.length*4.6 + dl.length*3.7, p.mostrarRef ? 9 : 5); need(h + 6);
       F('bold', 10); ink(); doc.text(nl, M, y); let yy = y + nl.length*4.6; F('normal', 8.5); mute(); doc.text(dl, M, yy - 0.6);
-      const q = hasParts(l.it) ? (l.rec === 'mensal' ? 'Mensal' : 'Projeto') : l.it.unit === 'pct' ? 'Gestão do projeto' : (l.it.unit === 'mês' || l.it.unit === 'projeto') && l.qty === 1 ? (l.rec === 'mensal' ? 'Mensal' : 'Projeto') : fmtIn(l.qty) + ' ' + unitLabel(l.it, l.qty) + (l.rec === 'mensal' ? ' por mês' : '');
+      const q = qtyLabel(l);
       F('normal', 8.5); mute(); doc.text(q, xQ, y);
       F('bold', 10); ink(); doc.text(BRL2(l.price) + (l.rec === 'mensal' ? '/mês' : ''), xV, y, {align: 'right'});
       if (p.mostrarRef && l.tabela > l.price) { F('normal', 7.5); grey(); const tx = BRL2(l.tabela), tw = doc.getTextWidth(tx); doc.text(tx, xV, y + 4.4, {align: 'right'}); doc.setDrawColor(166,166,166); doc.line(xV - tw, y + 3.4, xV, y + 3.4); }
       y += h + 1; doc.setDrawColor(235,235,235); doc.line(M, y, W - M, y); y += 6; });
     y += 3; });
   // Totais
-  need(26); const tot = (l, v) => { F('normal', 9.5); mute(); doc.text(l, xQ, y); F('bold', 11); ink(); doc.text(v, xV, y, {align: 'right'}); y += 6.5; };
-  if (T.unico.n) tot('Total itens únicos', BRL2(T.unico.price)); if (T.mensal.n) tot('Total mensal', BRL2(T.mensal.price) + '/mês'); if (T.mensal.n && T.meses) tot('Contrato de ' + T.meses + (T.meses === 1 ? ' mês' : ' meses'), BRL2(T.contrato.price));
+  need(26); const tot = (l, v) => { F('bold', 11); const vw = doc.getTextWidth(v); ink(); doc.text(v, xV, y, {align: 'right'}); F('normal', 9.5); mute(); doc.text(l, xV - vw - 5, y, {align: 'right'}); y += 6.5; };
+  if (T.mensal.n) tot('Investimento mensal', BRL2(T.mensal.price) + '/mês'); if (T.unico.n) tot('Projetos e entregas únicas', BRL2(T.unico.price));
   y += 6;
   // Condições
-  const cond = [];
-  if (val) cond.push(['Validade', 'Proposta válida por ' + p.validade + ' dias, até ' + val + '.']);
-  if (T.mensal.n && T.meses) cond.push(['Prazo', 'Itens mensais contratados por ' + T.meses + (T.meses === 1 ? ' mês' : ' meses') + ' a partir do início do projeto.']);
-  if ((p.pagamento||'').trim()) cond.push(['Pagamento', p.pagamento.trim()]);
-  if ((s.ressalva||'').trim()) cond.push(['Não incluso', s.ressalva.trim()]);
-  if ((p.obs||'').trim()) cond.push(['Observações', p.obs.trim()]);
-  if (p.mostrarRef) cond.push(['Referência', 'Valores de referência: ' + s.fonte + ', atualizados em ' + PCT2(s.reajuste/100) + ' (' + s.reajusteNota + ').']);
+  const cond = propConds(p, T);
   if (cond.length) { need(16); F('bold', 12); ink(); doc.text('Condições', M, y); y += 7;
     cond.forEach(([l, v]) => { F('normal', 9); const vl = doc.splitTextToSize(v, CW - 34); need(vl.length*4.4 + 4); F('bold', 8.5); ink(); doc.text(l, M, y); F('normal', 9); doc.setTextColor(61,61,61); doc.text(vl, M + 34, y); y += vl.length*4.4 + 3.5; }); y += 4; }
   // Aceite
-  need(40); y = Math.max(y + 6, Math.min(BOT - 30, y + 6)); F('bold', 12); ink(); doc.text('Aceite', M, y); y += 20;
-  const sw = (CW - 16)/2; doc.setDrawColor(10,10,10); doc.line(M, y, M + sw, y); doc.line(M + sw + 16, y, W - M, y);
-  F('bold', 9); ink(); doc.text('FIRMA', M, y + 5); doc.text(doc.splitTextToSize(p.client || 'Cliente', sw)[0], M + sw + 16, y + 5);
-  F('normal', 8); mute(); doc.text('Data:', M, y + 10); doc.text('Data:', M + sw + 16, y + 10);
+  const acc = ex.acc, url = ex.url, sgn = (s.assinante || '').trim();
+  need(80); y += 4; F('bold', 12); ink(); doc.text('Aceite', M, y); y += 6;
+  F('normal', 9); doc.setTextColor(61,61,61); doc.text(doc.splitTextToSize('Ao aprovar, o cliente concorda com o escopo, os valores e as condições desta proposta, que passa a valer como autorização para o início do projeto.', CW), M, y + 2); y += 12;
+  const sw = (CW - 12)/2, x2 = M + sw + 12, top = y;
+  // FIRMA
+  doc.setFillColor(244,244,244); doc.roundedRect(M, top, sw, 56, 3, 3, 'F'); doc.roundedRect(x2, top, sw, 56, 3, 3, 'F');
+  F('bold', 7); mute(); doc.text('PELA FIRMA', M + 6, top + 8); doc.text('PELO CLIENTE', x2 + 6, top + 8);
+  if (sgn) { doc.setFont('times', 'italic'); doc.setFontSize(22); ink(); doc.text(sgn, M + 6, top + 26); }
+  doc.setDrawColor(10,10,10); doc.line(M + 6, top + 30, M + sw - 6, top + 30);
+  F('bold', 9); ink(); doc.text(doc.splitTextToSize([sgn || '[a preencher]', s.assinanteCargo].filter(Boolean).join(', '), sw - 12)[0], M + 6, top + 35);
+  F('normal', 7.5); mute(); doc.text('FIRMA  ·  CNPJ 20.431.153/0001-09', M + 6, top + 40); if (sgn) doc.text('Assinado eletronicamente em ' + dt, M + 6, top + 44.5);
+  // Cliente
+  if (acc) { doc.setFont('times', 'italic'); doc.setFontSize(20); ink(); doc.text(doc.splitTextToSize(acc.name, sw - 12)[0], x2 + 6, top + 26);
+    doc.line(x2 + 6, top + 30, x2 + sw - 6, top + 30); F('bold', 9); ink(); doc.text(doc.splitTextToSize([acc.name, acc.role].filter(Boolean).join(', '), sw - 12)[0], x2 + 6, top + 35);
+    F('normal', 7.5); mute(); doc.text(doc.splitTextToSize([p.client, acc.doc].filter(Boolean).join('  ·  '), sw - 12)[0], x2 + 6, top + 40); doc.text('Aprovado eletronicamente em ' + dtBR(acc.at), x2 + 6, top + 44.5); }
+  else if (url) { const qs = 30, qx = x2 + sw - 6 - qs; doc.setFillColor(255,255,255); doc.roundedRect(qx - 2, top + 12, qs + 4, qs + 4, 2, 2, 'F'); qrDraw(doc, url, qx, top + 14, qs);
+    const tw = qx - x2 - 12; F('bold', 11); ink(); doc.text(doc.splitTextToSize('Aprove online em 1 minuto', tw), x2 + 6, top + 17);
+    F('normal', 8); doc.setTextColor(61,61,61); const ll = doc.splitTextToSize('Aponte a câmera do celular para o código ou clique aqui. Basta informar nome e e-mail para aprovar.', tw); doc.text(ll, x2 + 6, top + 27);
+    doc.link(x2 + 6, top + 12, tw, 30, {url}); doc.link(qx, top + 14, qs, qs, {url});
+    F('normal', 7); mute(); doc.text(doc.splitTextToSize('Se preferir, enviamos para assinatura digital via ClickSign.', sw - 12), x2 + 6, top + 51.5); }
+  else { doc.line(x2 + 6, top + 30, x2 + sw - 6, top + 30); F('bold', 9); ink(); doc.text(doc.splitTextToSize(p.client || 'Cliente', sw - 12)[0], x2 + 6, top + 35);
+    F('normal', 7.5); mute(); doc.text('Assinatura digital enviada via ClickSign.', x2 + 6, top + 40); }
+  y = top + 62;
+  if (acc || url) { F('normal', 6.8); grey(); doc.text(doc.splitTextToSize('Aceite eletrônico com registro de data, hora, IP e identificação do signatário, admitido entre as partes nos termos da MP 2.200-2/2001, art. 10, § 2º, e da Lei 14.063/2020.', CW), M, y); }
   const N = doc.getNumberOfPages();
   for (let i = 1; i <= N; i++) { doc.setPage(i); doc.setDrawColor(230,230,230); doc.line(M, H - 16, W - M, H - 16); F('normal', 7.5); mute();
     doc.text('FIRMA  ·  agenciafirma.com.br  ·  CNPJ 20.431.153/0001-09', M, H - 11); doc.text(num + '  ·  ' + i + ' de ' + N, W - M, H - 11, {align: 'right'}); }
@@ -847,7 +978,8 @@ async function exportPDF(btn, p){
   if (!p.client.trim() || !p.project.trim()) { toast('Preencha cliente e projeto para gerar a proposta.'); return; }
   if (p === P && (dirty || !P.id)) { const ok = await saveProp(); if (!ok) return; p = P; }
   const old = btn.innerHTML; btn.disabled = true; btn.textContent = 'Gerando…';
-  try { const doc = await buildPDF(p); window.__lastPdf = doc; const name = 'Proposta-FIRMA-' + slug(p.client) + '-' + slug(p.project) + (p.number ? '-' + p.number : '') + '.pdf';
+  let ex = {}; try { if (p.share && SHARES[p.share]) ex.acc = SHARES[p.share]; else ex.url = await ensureShare(p); } catch(e) { console.warn('aceite', e); }
+  try { const doc = await buildPDF(p, ex); window.__lastPdf = doc; const name = 'Proposta-FIRMA-' + slug(p.client) + '-' + slug(p.project) + (p.number ? '-' + p.number : '') + '.pdf';
     const b = new Blob([doc.output('arraybuffer')], {type: 'application/pdf'}), a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500); }
   catch(e) { console.error(e); toast('Erro ao gerar o PDF.'); }
   if (btn.isConnected) { btn.disabled = false; btn.innerHTML = old; }
@@ -862,6 +994,7 @@ async function boot(){
     CAT = cat; PROPS = props; const d = set.find(r => r.id === 'default'); if (d) SET = Object.assign(clone(DEF), d);
     try { CLIENTS = (await DB.all('clients')).filter(c => c.name); } catch(_) { CLIENTS = []; }
     try { OPPCAT = await DB.all('catalog'); } catch(_) { OPPCAT = []; }
+    await loadAccepts();
     const pz = set.find(r => r.id === 'presets'); PRESETS = pz && Array.isArray(pz.list) ? pz.list : [];
     let draft = null; try { draft = JSON.parse(sessionStorage.getItem('pp-draft') || 'null'); } catch(_) {}
     P = draft && draft.items ? normProp(draft) : newProp(); dirty = !!(draft && draft.items && Object.keys(draft.items).length && !draft.id);
