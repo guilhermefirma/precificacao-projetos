@@ -115,6 +115,7 @@ h2{font-family:var(--display);font-weight:500;font-size:20px;letter-spacing:-.02
 .sugg .src{color:var(--muted);font-size:11px;display:block}
 .best .t{min-width:700px}.note-best{font-size:12px;color:var(--muted);margin:10px 2px 0}.t td small.su{display:block;color:var(--muted);font-weight:400}
 .col{container-type:inline-size}
+.drb{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;background:var(--warnbg);color:var(--ink);border-radius:16px;padding:10px 14px;font-size:13px}.pnum{font-family:var(--text);font-size:12px;font-weight:500;color:var(--muted);margin-left:6px;letter-spacing:0}
 .kps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
 .kp{background:var(--surface);border-radius:18px;padding:14px 16px;display:flex;flex-direction:column;gap:3px;min-width:0}.kp span{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
 .kp b{font-family:var(--display);font-weight:500;font-size:22px;letter-spacing:-.02em;font-variant-numeric:tabular-nums}.kp small{font-size:12px;color:var(--muted)}
@@ -381,13 +382,14 @@ function memDb(seed){ const T = clone(seed);
 
 /* ---------- estado ---------- */
 let bestOpen = (() => { try { return sessionStorage.getItem('pp-best') === '1'; } catch(_) { return false; } })();
-let SHARES = {}, propF = 'all', propQ = ''; const ACEITE = 'https://guilhermefirma.github.io/precificacao-projetos/aceite/';
+let SHARES = {}, propF = 'all', propQ = '', DRAFT = null;
+function draftDirty(d){ const s = PROPS.find(p => p.id === d.id); return !s || JSON.stringify(s.items) !== JSON.stringify(d.items) || s.client !== d.client || s.project !== d.project; } const ACEITE = 'https://guilhermefirma.github.io/precificacao-projetos/aceite/';
 let CAT = [], SET = clone(DEF), CLIENTS = [], PROPS = [], PRESETS = [], OPPCAT = [], CBOPTS = [], cbIdx = 0, P = null, view = 'comp', seg = 'mensal', openF = new Set(['growth']), ready = false, denied = false, offline = false, dirty = false, sideOpen = false;
 function newProp(){ return {id: null, number: '', client: '', project: '', contact: '', date: todayISO(), validade: SET.validade, meses: SET.meses, pagamento: SET.pagamento || '', obs: '',
   descExtra: 0, mostrarRef: SET.mostrarRef !== false, params: paramsFrom(SET), items: {}, order: []}; }
 function paramsFrom(s){ return {reajuste: +s.reajuste||0, reajusteNota: s.reajusteNota||'', descPadrao: +s.descPadrao||0, imposto: +s.imposto||0, custoOp: +s.custoOp||0, custoDir: +s.custoDir||0, arred: +s.arred||0, fonte: s.fonte||'', ressalva: s.ressalva||'', assinante: s.assinante == null || s.assinante === 'Vitor Horvat' ? 'Vitor Horvath' : s.assinante, assinanteCargo: s.assinanteCargo||''}; }
 function snap(it){ return {code: it.code, front: it.front, name: it.name, desc: it.desc, rec: it.rec, unit: it.unit, ref: +it.ref||0, basis: it.basis||[], parts: it.parts && it.parts.length ? clone(it.parts) : undefined}; }
-function saveDraft(){ try { sessionStorage.setItem('pp-draft', JSON.stringify(P)); } catch(_) {} }
+function saveDraft(){ try { if (dirty) sessionStorage.setItem('pp-draft', JSON.stringify(P)); else sessionStorage.removeItem('pp-draft'); } catch(_) {} }
 function markDirty(){ dirty = true; saveDraft(); const st = $('pst'); if (st) st.textContent = 'Alterações não salvas'; }
 
 /* ---------- cálculo ---------- */
@@ -452,7 +454,8 @@ function render(){
   if (offline) { v.innerHTML = '<div class="empty"><b>Sem conexão com o banco</b>Não foi possível carregar os dados. Recarregue a página em alguns instantes.</div>'; return; }
   if (!ready) return;
   if (view === 'comp') v.innerHTML = viewComp();
-  else if (view === 'props') v.innerHTML = viewProps();
+  else if (view === 'props') v.innerHTML = viewProps('gen');
+  else if (view === 'saved') v.innerHTML = viewProps('saved');
   else v.innerHTML = viewCat();
   if (view === 'comp') syncPad();
 }
@@ -462,16 +465,21 @@ function renderActs(){
     <button class="f-btn" data-a="params">Parâmetros</button>
     <button class="f-btn" id="b-out">Sair</button>`;
 }
+function propName(p){ return [p.client, p.project].map(x => (x||'').trim()).filter(Boolean).join(' · '); }
+function propTitle(){ return propName(P) || 'Nova proposta'; }
+function liveName(){ const h = $('ptitle'); if (h) h.textContent = propTitle(); const n = $('pnum'); if (n) n.textContent = P.number || ''; renderTabs(); }
 function renderTabs(){
   const t = $('vtabs'); if (!ready) { t.innerHTML = ''; return; }
-  const tabs = [['comp', 'Composição' + (P.number ? ' · ' + P.number : '')], ['props', 'Propostas geradas (' + PROPS.length + ')'], ['cat', 'Cardápio (' + CAT.length + ')']];
+  const nm = propName(P), gen = PROPS.filter(p => p.share).length;
+  const tabs = [['comp', 'Composição' + (nm ? ' · ' + (nm.length > 34 ? nm.slice(0, 33) + '…' : nm) : '')], ['saved', 'Propostas salvas (' + PROPS.length + ')'], ['props', 'Propostas geradas (' + gen + ')'], ['cat', 'Cardápio (' + CAT.length + ')']];
   t.innerHTML = tabs.map(([k, l]) => `<button class="vt" role="tab" aria-selected="${view === k}" data-view="${k}">${esc(l)}</button>`).join('');
 }
 function priceOf(it){ const s = P.params; return it.unit === 'pct' ? null : roundUp((hasParts(it) ? partsRef(it, partDefaults(it)) : it.ref)*(1 + s.reajuste/100)*(1 - s.descPadrao/100)*(1 - (+P.descExtra||0)/100), s.arred); }
 function viewComp(){
+  const drb = DRAFT ? `<div class="drb"><span>Você tem uma proposta não salva${propName(DRAFT) ? ': <b>' + esc(propName(DRAFT)) + '</b>' : ''}.</span><span class="acts"><button class="mini" data-draft="load">Recuperar</button><button class="mini" data-draft="drop">Descartar</button></span></div>` : '';
   const T = calc(P), cl = CLIENTS.map(c => `<option value="${esc(c.name)}">`).join('');
   const info = `<section class="card">
-    <div class="bar" style="margin:0"><h2>${P.id ? 'Proposta ' + esc(P.number) : 'Nova proposta'}</h2><span class="st" id="pst">${dirty ? 'Alterações não salvas' : (P.id ? 'Salva' : 'Ainda não salva')}</span></div>
+    <div class="bar" style="margin:0"><h2><span id="ptitle">${esc(propTitle())}</span> <small id="pnum" class="pnum">${esc(P.number || '')}</small></h2><span class="st" id="pst">${dirty ? 'Alterações não salvas' : (P.id ? 'Salva' : 'Ainda não salva')}</span></div>
     <div class="grid">
       <label class="fl s3">Cliente<input data-f="client" value="${esc(P.client)}" placeholder="Nome do cliente" autocomplete="off"></label>
       <label class="fl s3">Projeto<input data-f="project" value="${esc(P.project)}" placeholder="Nome do projeto"></label>
@@ -493,7 +501,7 @@ function viewComp(){
       ${open ? `<div class="fb"><div class="items">${all.map(itemCard).join('')}</div></div>` : ''}</section>`;
   }).join('');
   const disc = discTable(T);
-  return `<div class="layout"><div class="col">${info}
+  return `<div class="layout"><div class="col">${drb}${info}
     <div class="bar"><h2>Escopo</h2><span class="st">Digite, escolha um projeto de referência ou marque os itens. Preços com o desconto padrão de ${PCT(P.params.descPadrao/100)}.</span></div>
     <div class="cb" id="cb"><svg class="ic" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="7" cy="7" r="4.8"/><path d="M10.6 10.6 14 14"/></svg><input id="q" type="search" placeholder="Digite um item do escopo ou um projeto de referência" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="cbl" aria-autocomplete="list"><div class="cbl" id="cbl" role="listbox" hidden></div></div>
     ${bestHTML()}
@@ -569,18 +577,19 @@ function discTable(T){
 }
 function syncPad(){ const sd = $('side'); if (!sd) return; const m = window.matchMedia('(max-width:1100px)').matches; document.body.style.paddingBottom = m ? (sd.offsetHeight + 24) + 'px' : ''; document.documentElement.style.setProperty('--sheet', m ? sd.offsetHeight + 'px' : '0px'); }
 function propStatus(p){ const a = p.share && SHARES[p.share]; return a ? {k: 'ok', l: 'Aceite formalizado', d: dtBR(a.at) + ' · ' + a.name} : p.share ? {k: 'wait', l: 'Aguardando aceite', d: 'Link gerado'} : {k: 'draft', l: 'Sem link', d: 'Só salva'}; }
-function viewProps(){
-  if (!PROPS.length) return '<div class="empty"><b>Nenhuma proposta gerada</b>Monte o escopo na aba Composição e clique em Salvar ou Exportar proposta.</div>';
-  const all = PROPS.map(p => ({p, T: calc(p), st: propStatus(p)}));
+function viewProps(mode){
+  const gen = mode === 'gen', base = gen ? PROPS.filter(p => p.share) : PROPS;
+  if (!base.length) return gen ? '<div class="empty"><b>Nenhuma proposta gerada</b>Quando você gerar o link de uma proposta, ou exportar o PDF, ela aparece aqui com o status do aceite.</div>' : '<div class="empty"><b>Nenhuma proposta salva</b>Monte o escopo na aba Composição e clique em Salvar.</div>';
+  const all = base.map(p => ({p, T: calc(p), st: propStatus(p)}));
   const cnt = k => all.filter(x => k === 'all' || x.st.k === k).length;
   const q = propQ.trim().toLowerCase();
   const rows = all.filter(x => (propF === 'all' || x.st.k === propF) && (!q || [x.p.number, x.p.client, x.p.project, x.p.contact].join(' ').toLowerCase().includes(q)))
     .sort((a,b) => String(b.p.updatedAt || b.p.date || '').localeCompare(String(a.p.updatedAt || a.p.date || '')));
   const ok = all.filter(x => x.st.k === 'ok'), sent = all.filter(x => x.st.k !== 'draft');
   const kpi = (l, v, sub) => `<div class="kp"><span>${l}</span><b>${v}</b>${sub ? `<small>${sub}</small>` : ''}</div>`;
-  const kpis = `<div class="kps">${kpi('Propostas geradas', all.length, sent.length + ' com link enviado')}${kpi('Aceites formalizados', ok.length, sent.length ? PCT(ok.length/sent.length) + ' dos links enviados' : '')}
+  const kpis = !gen ? '' : `<div class="kps">${kpi('Propostas geradas', all.length, PROPS.length + ' salvas no total')}${kpi('Aceites formalizados', ok.length, all.length ? PCT(ok.length/all.length) + ' das geradas' : '')}
     ${kpi('Mensal com aceite', BRL(ok.reduce((t,x) => t + x.T.mensal.price, 0)) + '/mês', 'soma dos aceites')}${kpi('Mensal em aberto', BRL(all.filter(x => x.st.k === 'wait').reduce((t,x) => t + x.T.mensal.price, 0)) + '/mês', 'aguardando aceite')}</div>`;
-  const chips = [['all','Todas'],['wait','Aguardando aceite'],['ok','Aceite formalizado'],['draft','Sem link']].map(([k,l]) => `<button class="chip" data-pf="${k}" aria-pressed="${propF === k}">${l} <span>${cnt(k)}</span></button>`).join('');
+  const chips = (gen ? [['all','Todas'],['wait','Aguardando aceite'],['ok','Aceite formalizado']] : [['all','Todas'],['draft','Sem link'],['wait','Aguardando aceite'],['ok','Aceite formalizado']]).map(([k,l]) => `<button class="chip" data-pf="${k}" aria-pressed="${propF === k}">${l} <span>${cnt(k)}</span></button>`).join('');
   const acts = p => `<div class="acts"><button class="mini" data-open="${p.id}">Abrir</button><button class="mini" data-ppdf="${p.id}">PDF</button><button class="mini" data-plink="${p.id}">${p.share ? 'Copiar link' : 'Gerar link'}</button><button class="mini" data-dup="${p.id}">Duplicar</button><button class="mini del" data-pdel="${p.id}">Excluir</button></div>`;
   const badge = st => `<span class="stb ${st.k}">${st.l}</span><small>${esc(st.d)}</small>`;
   const tr = rows.map(({p, T, st}) => `<tr><td class="l"><b>${esc(p.number)}</b><small>${dBR(p.date)}${p.by ? ' · ' + esc(String(p.by).split('@')[0]) : ''}</small></td><td class="l">${esc(p.client)}<small>${esc(p.project)}</small></td>
@@ -589,7 +598,7 @@ function viewProps(){
   const cards = rows.map(({p, T, st}) => `<div class="pcard"><div class="bl-h"><div><b>${esc(p.client)}</b><small class="w">${esc(p.project)} · ${esc(p.number)} · ${dBR(p.date)}</small></div></div>
       <div class="st-c">${badge(st)}</div>
       <div class="bl-v"><div><span>Mensal</span><b>${T.mensal.n ? BRL(T.mensal.price) + '/mês' : '·'}</b></div><div><span>Único</span><b>${T.unico.n ? BRL(T.unico.price) : '·'}</b></div><div><span>Margem</span><b class="pos">${BRL(T.contrato.mg)}</b></div></div>${acts(p)}</div>`).join('');
-  return `<div class="col"><div class="bar" style="margin:0"><h2>Propostas geradas</h2><span class="st">Status do aceite de cada proposta</span></div>${kpis}
+  return `<div class="col"><div class="bar" style="margin:0"><h2>${gen ? 'Propostas geradas' : 'Propostas salvas'}</h2><span class="st">${gen ? 'Propostas com link enviado e o status do aceite' : 'Todas as propostas salvas no sistema'}</span></div>${kpis}
     <div class="pfil"><div class="chips">${chips}</div><input id="pq" type="search" placeholder="Buscar proposta" value="${esc(propQ)}" autocomplete="off"></div>
     ${rows.length ? `<div class="tw props-t"><table class="t"><thead><tr><th class="l">Nº</th><th class="l">Cliente e projeto</th><th>Mensal</th><th>Único</th><th>Margem</th><th class="l">Status</th><th></th></tr></thead><tbody>${tr}</tbody></table></div><div class="props-l">${cards}</div>` : '<div class="empty"><b>Nada encontrado</b>Mude o filtro ou a busca.</div>'}</div>`;
 }
@@ -784,6 +793,7 @@ async function saveProp(quiet){
   try {
     if (!P.id) { P.number = d.number = await nextNumber(); d.createdAt = d.updatedAt; P.id = await DB.add('pricing_proposals', d); }
     else await DB.put('pricing_proposals', P.id, d);
+    if (P.share && !SHARES[P.share]) { try { await DB.share(P.share, shareSnap(P)); } catch(_) {} }
     PROPS = await DB.all('pricing_proposals'); dirty = false; saveDraft(); render(); if (!quiet) toast('Proposta ' + P.number + ' salva.'); return true;
   } catch(e) { console.error(e); toast('Não foi possível salvar: ' + (e.message || 'erro no banco')); return false; }
 }
@@ -800,10 +810,10 @@ document.addEventListener('click', async e => {
   const sgb = t.closest('[data-sg]'); if (sgb) { useSugg(+sgb.dataset.sg); return; }
   const pa = t.closest('[data-papply]'); if (pa) { const pr = PRESETS.find(x => x.id === pa.dataset.papply); if (pr) { view = 'comp'; applyPreset(pr); } return; }
   const pdl = t.closest('[data-predel]'); if (pdl) { confirmBtn(pdl, async () => { const keep = PRESETS; PRESETS = PRESETS.filter(x => x.id !== pdl.dataset.predel); try { await savePresets(); render(); toast('Projeto de referência excluído.'); } catch(err) { PRESETS = keep; toast('Não foi possível excluir.'); } }); return; }
-  const vb = t.closest('[data-view]'); if (vb) { view = vb.dataset.view; render(); if (view === 'props') loadAccepts().then(() => { if (view === 'props') render(); }); return; }
+  const vb = t.closest('[data-view]'); if (vb) { view = vb.dataset.view; render(); if (view === 'props' || view === 'saved') { propF = 'all'; loadAccepts().then(() => { if (view === 'props' || view === 'saved') render(); }); } return; }
   const a = t.closest('[data-a]');
   if (a) { const k = a.dataset.a;
-    if (k === 'new') { if (dirty && !confirm('Descartar as alterações não salvas desta proposta?')) return; P = newProp(); dirty = false; saveDraft(); view = 'comp'; render(); }
+    if (k === 'new') { if (dirty && !confirm('Descartar as alterações não salvas desta proposta?')) return; P = newProp(); dirty = false; DRAFT = null; saveDraft(); view = 'comp'; render(); }
     else if (k === 'params') paramsModal();
     else if (k === 'save') saveProp();
     else if (k === 'pdf') exportPDF(a, P);
@@ -819,11 +829,12 @@ document.addEventListener('click', async e => {
   const it = t.closest('[data-it]'); if (it) { toggleItem(it.dataset.it); return; }
   const op = t.closest('[data-open]'); if (op) { if (dirty && !confirm('Descartar as alterações não salvas da proposta aberta?')) return; P = normProp(clone(PROPS.find(p => p.id === op.dataset.open))); dirty = false; saveDraft(); view = 'comp'; render(); return; }
   const dp = t.closest('[data-dup]'); if (dp) { const s = normProp(clone(PROPS.find(p => p.id === dp.dataset.dup))); s.id = null; s.number = ''; s.date = todayISO(); s.project = s.project + ' (cópia)'; P = s; dirty = true; saveDraft(); view = 'comp'; render(); toast('Cópia aberta. Ajuste e salve para gerar o novo número.'); return; }
+  const drf = t.closest('[data-draft]'); if (drf) { if (drf.dataset.draft === 'load' && DRAFT) { P = normProp(DRAFT); dirty = true; } DRAFT = null; saveDraft(); render(); return; }
   const pfb = t.closest('[data-pf]'); if (pfb) { propF = pfb.dataset.pf; render(); return; }
   const pl = t.closest('[data-plink]'); if (pl) { const pr = normProp(clone(PROPS.find(p => p.id === pl.dataset.plink))); pl.disabled = true;
     try { const url = await ensureShare(pr); PROPS = await DB.all('pricing_proposals'); if (P.id === pr.id) P.share = pr.share; try { await navigator.clipboard.writeText(url); toast('Link da proposta ' + pr.number + ' copiado.'); } catch(_) { prompt('Copie o link da proposta:', url); } render(); }
     catch(err) { console.error(err); toast('Não foi possível gerar o link.'); pl.disabled = false; } return; }
-  const pp = t.closest('[data-ppdf]'); if (pp) { const pr = normProp(clone(PROPS.find(p => p.id === pp.dataset.ppdf))); await exportPDF(pp, pr); if (pr.share) { PROPS = await DB.all('pricing_proposals'); if (P.id === pr.id) P.share = pr.share; if (view === 'props') render(); } return; }
+  const pp = t.closest('[data-ppdf]'); if (pp) { const pr = normProp(clone(PROPS.find(p => p.id === pp.dataset.ppdf))); await exportPDF(pp, pr); if (pr.share) { PROPS = await DB.all('pricing_proposals'); if (P.id === pr.id) P.share = pr.share; if (view !== 'comp') render(); } return; }
   const pd = t.closest('[data-pdel]'); if (pd) { confirmBtn(pd, async () => { try { await DB.del('pricing_proposals', pd.dataset.pdel); if (P.id === pd.dataset.pdel) { P.id = null; P.number = ''; dirty = true; } PROPS = await DB.all('pricing_proposals'); render(); toast('Proposta excluída.'); } catch(err) { toast('Não foi possível excluir.'); } }); return; }
   const ce = t.closest('[data-cedit]'); if (ce) { catModal(ce.dataset.cedit); return; }
   const cd = t.closest('[data-cdel]'); if (cd) { confirmBtn(cd, async () => { const it = CAT.find(c => c.code === cd.dataset.cdel); try { await DB.del('pricing_catalog', it.id); CAT = await loadCat(); render(); toast('Item excluído do cardápio.'); } catch(err) { toast('Não foi possível excluir.'); } }); return; }
@@ -841,7 +852,7 @@ document.addEventListener('input', e => {
   if (t.id === 'q') { cbIdx = 0; renderCb(); return; }
   if (t.id === 'pq') { propQ = t.value; render(); const n = $('pq'); if (n) { n.focus(); n.setSelectionRange(n.value.length, n.value.length); } return; }
   if (t.form && t.form.id === 'f-cat') { if (t.name === 'ref') t.dataset.touched = '1'; if (t.name === 'name' || t.name === 'desc') renderSugg(true); return; }
-  if (t.dataset.f) { const k = t.dataset.f; P[k] = t.type === 'checkbox' ? t.checked : (k === 'validade' || k === 'meses') ? Math.max(0, Math.round(numIn(t.value))) : t.value; markDirty(); if (k === 'meses') refreshNums(); return; }
+  if (t.dataset.f) { const k = t.dataset.f; P[k] = t.type === 'checkbox' ? t.checked : (k === 'validade' || k === 'meses') ? Math.max(0, Math.round(numIn(t.value))) : t.value; markDirty(); if (k === 'meses') refreshNums(); if (k === 'client' || k === 'project') liveName(); return; }
   if (t.dataset.pc) { const [c, pid] = t.dataset.pc.split('|'), sl = P.items[c]; if (sl) { sl.parts = sl.parts || {}; const pt = (sl.snap.parts||[]).find(x => x.id === pid);
       if (t.checked) sl.parts[pid] = +pt.qty || 1; else delete sl.parts[pid]; markDirty(); render(); } return; }
   if (t.dataset.pq) { const [c, pid] = t.dataset.pq.split('|'), sl = P.items[c]; if (sl && sl.parts) { sl.parts[pid] = Math.max(0, numIn(t.value)); markDirty(); refreshNums(); } return; }
@@ -916,12 +927,12 @@ const newToken = () => { const a = new Uint8Array(18); crypto.getRandomValues(a)
 async function ensureShare(p){
   if (!p.share) { p.share = newToken(); if (p === P) { const ok = await saveProp(true); if (!ok) { p.share = null; return null; } } else await DB.put('pricing_proposals', p.id, p); }
   if (!SHARES[p.share]) await DB.share(p.share, shareSnap(p));
-  return ACEITE + '?t=' + p.share; }
+  return ACEITE + '?t=' + p.share + (slug(p.client) ? '&c=' + slug(p.client) : ''); }
 async function copyShare(btn){
   if (!P.client.trim() || !P.project.trim()) { toast('Preencha cliente e projeto para gerar o link.'); return; }
   if (dirty || !P.id) { const ok = await saveProp(true); if (!ok) return; }
   btn.disabled = true;
-  try { const url = await ensureShare(P); if (!url) return; try { await navigator.clipboard.writeText(url); toast('Link da proposta copiado. O cliente acessa e formaliza o aceite por ele.'); } catch(_) { prompt('Copie o link da proposta:', url); } render(); }
+  try { const url = await ensureShare(P); if (!url) return; try { await navigator.clipboard.writeText(url); toast('Link da proposta ' + (propName(P) || '') + ' copiado. Nome e escopo atualizados.'); } catch(_) { prompt('Copie o link da proposta:', url); } render(); }
   catch(e) { console.error(e); toast('Não foi possível gerar o link de aceite.'); }
   finally { if (btn.isConnected) btn.disabled = false; } }
 
@@ -1033,7 +1044,7 @@ async function exportPDF(btn, p){
 
 /* ---------- carga ---------- */
 async function loadCat(){ return (await DB.all('pricing_catalog')).sort((a,b) => (a.order||0) - (b.order||0)); }
-function normProp(p){ p.items = p.items || {}; p.order = p.order || Object.keys(p.items); p.params = Object.assign(paramsFrom(DEF), p.params || {}); return p; }
+function normProp(p){ p.items = p.items || {}; p.order = p.order || Object.keys(p.items); p.params = Object.assign(paramsFrom(DEF), p.params || {}); if (!p.params.assinante || p.params.assinante === 'Vitor Horvat') p.params.assinante = 'Vitor Horvath'; return p; }
 async function boot(){
   try {
     const [cat, set, props] = await Promise.all([loadCat(), DB.all('pricing_settings'), DB.all('pricing_proposals')]);
@@ -1043,7 +1054,8 @@ async function boot(){
     await loadAccepts();
     const pz = set.find(r => r.id === 'presets'); PRESETS = pz && Array.isArray(pz.list) ? pz.list : [];
     let draft = null; try { draft = JSON.parse(sessionStorage.getItem('pp-draft') || 'null'); } catch(_) {}
-    P = draft && draft.items ? normProp(draft) : newProp(); dirty = !!(draft && draft.items && Object.keys(draft.items).length && !draft.id);
+    P = newProp(); dirty = false;
+    DRAFT = draft && draft.items && (Object.keys(draft.items).length || (draft.client||'').trim()) && !(draft.id && !draftDirty(draft)) ? draft : null;
     ready = true; render(); window.__ready = true;
   } catch(e) { console.error(e); offline = true; render(); window.__ready = true; }
 }
