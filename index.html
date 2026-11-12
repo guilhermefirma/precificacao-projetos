@@ -137,7 +137,9 @@ h2{font-family:var(--display);font-weight:500;font-size:20px;letter-spacing:-.02
 .bl-v{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;font-variant-numeric:tabular-nums}
 .bl-v span{display:block;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:2px}
 .bl-v b{font-size:12.5px;white-space:nowrap}.bl-v small{display:block;color:var(--muted);font-size:11px}
-.bl .acts{display:grid;grid-template-columns:1fr 1fr;gap:6px}.bl .acts .mini{padding:8px 10px}
+.bl .acts{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}.mini.ed{border-style:dashed}.sigb{display:grid;grid-template-columns:220px 1fr;gap:14px;align-items:center;background:var(--surface);border-radius:16px;padding:12px}.sigp{height:80px;background:#fff;border-radius:12px;display:flex;align-items:center;justify-content:center;padding:8px;font-size:12px;color:var(--muted);text-align:center}.sigp img{max-height:64px;max-width:100%}
+@media (max-width:720px){.sigb{grid-template-columns:1fr}}
+.seg2{display:flex;gap:14px;flex-wrap:wrap;color:var(--ink);font-size:13px;margin-top:4px}.seg2 label{display:flex;flex-direction:row;gap:6px;align-items:center;white-space:nowrap;font-weight:500;color:var(--ink)}.seg2 input{accent-color:var(--ink)}.ovt{font-size:10px;font-weight:600;color:var(--warn);margin-left:4px}.bl .acts .mini{padding:8px 10px}
 .pre{border:1px solid var(--hair);border-radius:18px;padding:14px 16px;display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
 .pre b{font-family:var(--display);font-weight:500;font-size:16px}.pre p{margin:4px 0 0;color:var(--muted);font-size:12.5px;max-width:80ch}
 .link{background:none;border:0;color:var(--ink);text-decoration:underline;text-underline-offset:2px;cursor:pointer;font-size:12px;font-weight:500;padding:0;white-space:nowrap}
@@ -182,6 +184,7 @@ table.t{border-collapse:separate;border-spacing:0;width:100%;font-size:13px;min-
 .sbtn{flex:1;font-size:13px;font-weight:600;border-radius:999px;border:1px solid rgba(255,255,255,.35);background:transparent;color:var(--oncard);padding:10px 14px;cursor:pointer;white-space:nowrap}
 .sbtn.w{background:#fff;color:var(--ink);border-color:#fff}
 .sbtn:hover{border-color:#fff}.sbtn[disabled]{opacity:.4;cursor:default}
+.lnk{display:flex;gap:6px;align-items:center;background:rgba(255,255,255,.08);border-radius:999px;padding:4px 4px 4px 12px}.lnk input{flex:1;min-width:0;background:none;border:0;color:#fff;font-size:12px;outline:none}.lnk .mini{background:#fff;color:#0a0a0a;border-color:#fff;text-decoration:none}
 .acc-b{border-style:dashed}.acc{border-radius:14px;padding:10px 14px;background:rgba(255,255,255,.1);display:flex;flex-direction:column;gap:2px}.acc b{font-size:13px}.acc small{font-size:12px;opacity:.7}
 td .badge{display:inline-block;margin-top:4px;font-size:11px;padding:2px 9px}.badge.okb{background:#0a0a0a;color:#fff}
 .side .note{font-size:11.5px;color:var(--oncard-mute);line-height:1.45}
@@ -382,7 +385,7 @@ function memDb(seed){ const T = clone(seed);
 
 /* ---------- estado ---------- */
 let bestOpen = (() => { try { return sessionStorage.getItem('pp-best') === '1'; } catch(_) { return false; } })();
-let SHARES = {}, propF = 'all', propQ = '', DRAFT = null;
+let SHARES = {}, propF = 'all', propQ = '', DRAFT = null, BOV = {}, SIGIMG = '';
 function draftDirty(d){ const s = PROPS.find(p => p.id === d.id); return !s || JSON.stringify(s.items) !== JSON.stringify(d.items) || s.client !== d.client || s.project !== d.project; } const ACEITE = 'https://guilhermefirma.github.io/precificacao-projetos/aceite/';
 let CAT = [], SET = clone(DEF), CLIENTS = [], PROPS = [], PRESETS = [], OPPCAT = [], CBOPTS = [], cbIdx = 0, P = null, view = 'comp', seg = 'mensal', openF = new Set(['growth']), ready = false, denied = false, offline = false, dirty = false, sideOpen = false;
 function newProp(){ return {id: null, number: '', client: '', project: '', contact: '', date: todayISO(), validade: SET.validade, meses: SET.meses, pagamento: SET.pagamento || '', obs: '',
@@ -465,7 +468,9 @@ function renderActs(){
     <button class="f-btn" data-a="params">Parâmetros</button>
     <button class="f-btn" id="b-out">Sair</button>`;
 }
-function propName(p){ return [p.client, p.project].map(x => (x||'').trim()).filter(Boolean).join(' · '); }
+function propName(p){ return [p.project, p.client].map(x => (x||'').trim()).filter(Boolean).join(' · '); }
+const coName = p => (p.project||'').trim() || (p.client||'').trim();
+const personLine = p => [(p.client||'').trim(), (p.contact||'').trim()].filter(Boolean).join(', ');
 function propTitle(){ return propName(P) || 'Nova proposta'; }
 function liveName(){ const h = $('ptitle'); if (h) h.textContent = propTitle(); const n = $('pnum'); if (n) n.textContent = P.number || ''; renderTabs(); }
 function renderTabs(){
@@ -481,9 +486,9 @@ function viewComp(){
   const info = `<section class="card">
     <div class="bar" style="margin:0"><h2><span id="ptitle">${esc(propTitle())}</span> <small id="pnum" class="pnum">${esc(P.number || '')}</small></h2><span class="st" id="pst">${dirty ? 'Alterações não salvas' : (P.id ? 'Salva' : 'Ainda não salva')}</span></div>
     <div class="grid">
-      <label class="fl s3">Cliente<input data-f="client" value="${esc(P.client)}" placeholder="Nome do cliente" autocomplete="off"></label>
-      <label class="fl s3">Projeto<input data-f="project" value="${esc(P.project)}" placeholder="Nome do projeto"></label>
-      <label class="fl s2">Contato do cliente<input data-f="contact" value="${esc(P.contact)}" placeholder="Nome e cargo"></label>
+      <label class="fl s2">Cliente<input data-f="client" value="${esc(P.client)}" placeholder="Nome do cliente" autocomplete="off"></label>
+      <label class="fl s2">Empresa<input data-f="project" value="${esc(P.project)}" placeholder="Nome da empresa" autocomplete="off"></label>
+      <label class="fl s2">Cargo<input data-f="contact" value="${esc(P.contact)}" placeholder="Cargo do contato" autocomplete="off"></label>
       <label class="fl">Data<input data-f="date" type="date" value="${esc(P.date)}"></label>
       <label class="fl">Validade (dias)<input data-f="validade" inputmode="numeric" value="${esc(P.validade)}"></label>
       <label class="fl s2">Prazo dos itens mensais (meses)<input data-f="meses" inputmode="numeric" value="${esc(P.meses)}"></label>
@@ -533,9 +538,11 @@ function itemCard(it){
     <span class="w">${esc(it.desc)}</span>
     <span class="tag${it.rec === 'mensal' ? ' m' : ''}">${it.rec === 'mensal' ? 'Mensal' : 'Único'}</span>${ctl}</div>`;
 }
-function accHTML(T){ const a = P.share && SHARES[P.share];
-  if (a) return `<div class="acc ok"><b>Aprovada por ${esc(a.name)}</b><small>${esc(dtBR(a.at))}${a.email ? ' · ' + esc(a.email) : ''}</small></div>`;
-  return `<button class="sbtn acc-b" data-a="share" ${T.contrato.n ? '' : 'disabled'} style="flex:none">${P.share ? 'Copiar link da proposta' : 'Gerar link da proposta com aceite'}</button>`; }
+function shareUrl(p){ return p.share ? ACEITE + '?t=' + p.share + (slug(coName(p)) ? '&c=' + slug(coName(p)) : '') : ''; }
+function accHTML(T){ const a = P.share && SHARES[P.share], u = shareUrl(P);
+  const box = u ? `<div class="lnk"><input readonly value="${esc(u)}" aria-label="Link da proposta"><button class="mini" data-a="copy">Copiar</button><a class="mini" href="${esc(u)}" target="_blank" rel="noopener">Abrir</a></div>` : '';
+  if (a) return `<div class="acc ok"><b>Aceite formalizado por ${esc(a.name)}</b><small>${esc(dtBR(a.at))}${a.email ? ' · ' + esc(a.email) : ''}</small></div>${box}`;
+  return box ? `<div class="acc"><b>Aguardando aceite do cliente</b><small>O cliente abre o link, confere a proposta e formaliza o aceite.</small></div>${box}` : ''; }
 function sideHTML(T){
   const s = P.params, t = T[seg], ded = s.imposto + s.custoOp + s.custoDir;
   const lbl = {contrato: 'Valor do contrato', mensal: 'Mensalidade', unico: 'Itens únicos'}[seg];
@@ -558,7 +565,7 @@ function sideHTML(T){
       ${row('Margem FIRMA', BRL(t.mg), 'tot mg' + (t.mg < 0 ? ' neg' : ''), t.price ? PCT(mgp) : '')}
     </div>
     <div class="dx"><label for="dx">Desconto adicional na proposta inteira</label><span style="white-space:nowrap"><input id="dx" inputmode="decimal" value="${fmtIn(P.descExtra||0)}"> %</span></div>
-    <div class="sacts"><button class="sbtn w" data-a="save">Salvar</button><button class="sbtn" data-a="pdf" ${T.contrato.n ? '' : 'disabled'}>Exportar proposta</button></div>
+    <div class="sacts"><button class="sbtn" data-a="save">Salvar</button><button class="sbtn w" data-a="share" ${T.contrato.n ? '' : 'disabled'}>${P.share ? 'Atualizar link' : 'Gerar link da proposta'}</button></div>
     ${accHTML(T)}
     <button class="sbtn" data-a="preset" ${T.contrato.n ? '' : 'disabled'} style="flex:none">Salvar como projeto de referência</button>
     <div class="note">Custos sobre o preço ao cliente (soma ${PCT(ded/100)}). Tabela: ${esc(s.fonte)}, atualizada em ${PCT2(s.reajuste/100)} (${esc(s.reajusteNota)}). Uso interno, não sai na proposta.</div></div>`;
@@ -592,10 +599,10 @@ function viewProps(mode){
   const chips = (gen ? [['all','Todas'],['wait','Aguardando aceite'],['ok','Aceite formalizado']] : [['all','Todas'],['draft','Sem link'],['wait','Aguardando aceite'],['ok','Aceite formalizado']]).map(([k,l]) => `<button class="chip" data-pf="${k}" aria-pressed="${propF === k}">${l} <span>${cnt(k)}</span></button>`).join('');
   const acts = p => `<div class="acts"><button class="mini" data-open="${p.id}">Abrir</button><button class="mini" data-ppdf="${p.id}">PDF</button><button class="mini" data-plink="${p.id}">${p.share ? 'Copiar link' : 'Gerar link'}</button><button class="mini" data-dup="${p.id}">Duplicar</button><button class="mini del" data-pdel="${p.id}">Excluir</button></div>`;
   const badge = st => `<span class="stb ${st.k}">${st.l}</span><small>${esc(st.d)}</small>`;
-  const tr = rows.map(({p, T, st}) => `<tr><td class="l"><b>${esc(p.number)}</b><small>${dBR(p.date)}${p.by ? ' · ' + esc(String(p.by).split('@')[0]) : ''}</small></td><td class="l">${esc(p.client)}<small>${esc(p.project)}</small></td>
+  const tr = rows.map(({p, T, st}) => `<tr><td class="l"><b>${esc(p.number)}</b><small>${dBR(p.date)}${p.by ? ' · ' + esc(String(p.by).split('@')[0]) : ''}</small></td><td class="l">${esc(coName(p))}<small>${esc(personLine(p))}</small></td>
       <td>${T.mensal.n ? BRL(T.mensal.price) + '/mês' : ''}</td><td>${T.unico.n ? BRL(T.unico.price) : ''}</td><td class="pos">${BRL(T.contrato.mg)}<small style="display:block;color:var(--muted)">${T.contrato.price ? PCT(T.contrato.mg/T.contrato.price) : ''}</small></td>
       <td class="l st-c">${badge(st)}</td><td>${acts(p)}</td></tr>`).join('');
-  const cards = rows.map(({p, T, st}) => `<div class="pcard"><div class="bl-h"><div><b>${esc(p.client)}</b><small class="w">${esc(p.project)} · ${esc(p.number)} · ${dBR(p.date)}</small></div></div>
+  const cards = rows.map(({p, T, st}) => `<div class="pcard"><div class="bl-h"><div><b>${esc(coName(p))}</b><small class="w">${esc(personLine(p) ? personLine(p) + ' · ' : '')}${esc(p.number)} · ${dBR(p.date)}</small></div></div>
       <div class="st-c">${badge(st)}</div>
       <div class="bl-v"><div><span>Mensal</span><b>${T.mensal.n ? BRL(T.mensal.price) + '/mês' : '·'}</b></div><div><span>Único</span><b>${T.unico.n ? BRL(T.unico.price) : '·'}</b></div><div><span>Margem</span><b class="pos">${BRL(T.contrato.mg)}</b></div></div>${acts(p)}</div>`).join('');
   return `<div class="col"><div class="bar" style="margin:0"><h2>${gen ? 'Propostas geradas' : 'Propostas salvas'}</h2><span class="st">${gen ? 'Propostas com link enviado e o status do aceite' : 'Todas as propostas salvas no sistema'}</span></div>${kpis}
@@ -637,18 +644,18 @@ function bestRows(){
     const parts = hasParts(it) ? (b.parts ? b.parts : partDefaults(it)) : null, qty = b.qty || (hasParts(it) ? 1 : +it.qty || 1);
     const tab = (parts ? partsRef(it, parts) : it.ref) * qty * rj, sug = roundUp(tab*std, s.arred);
     const mensal = +o.price > 0, prat = mensal ? +o.price : +o.setup || 0, setup = mensal ? +o.setup || 0 : 0;
-    const n = CLIENTS.filter(c => c.items && c.items[b.opp] && c.items[b.opp].s === 'tem').length;
-    return {i, b, o, it, parts, qty, tab, sug, prat, setup, mensal, n, what: o.what || ''};
+    const n = CLIENTS.filter(c => c.items && c.items[b.opp] && c.items[b.opp].s === 'tem').length, ov = BOV[b.opp + '|' + b.code] || {};
+    return {i, b, o, it, parts, qty, tab, sug: +ov.sug > 0 ? +ov.sug : sug, prat: +ov.prat > 0 ? +ov.prat : prat, ovSug: +ov.sug > 0, ovPrat: +ov.prat > 0, setup, mensal, n, what: o.what || ''};
   }).filter(Boolean).sort((a, b) => b.n - a.n || b.prat - a.prat);
 }
 function bestHTML(){
   const R = bestRows(); if (!R.length) return '';
   const per = r => r.mensal ? '/mês' : '';
-  const btns = r => `<div class="acts"><button class="mini" data-best="${r.i}" data-bmode="sug">+ Sugerido</button><button class="mini" data-best="${r.i}" data-bmode="prat">+ Praticado</button></div>`;
+  const btns = r => `<div class="acts"><button class="mini" data-best="${r.i}" data-bmode="sug">+ Sugerido</button><button class="mini" data-best="${r.i}" data-bmode="prat">+ Praticado</button><button class="mini ed" data-bedit="${r.i}">Editar</button></div>`;
   const prat = r => `<b>${BRL(r.prat)}${per(r)}</b>${r.setup ? `<small class="su">+ ${BRL(r.setup)} implantação</small>` : ''}`;
   const body = bestOpen ? `<div class="fb"><p class="note-best" style="margin:0 2px 12px">Preço praticado nos contratos ao lado da tabela de referência e do sugerido com ${PCT(P.params.descPadrao/100)} de desconto.</p>
     <div class="tw best-t"><table class="t"><thead><tr><th class="l">Escopo</th><th>Clientes</th><th>Praticado FIRMA</th><th>Tabela</th><th>Sugerido</th><th></th></tr></thead><tbody>
-    ${R.map(r => `<tr><td class="l"><b>${esc(r.o.name)}</b><small>${esc(r.what)}</small></td><td>${r.n || '·'}</td><td>${prat(r)}</td><td>${BRL(r.tab)}${per(r)}</td><td><b>${BRL(r.sug)}${per(r)}</b></td><td>${btns(r)}</td></tr>`).join('')}
+    ${R.map(r => `<tr><td class="l"><b>${esc(r.o.name)}</b><small>${esc(r.what)}</small></td><td>${r.n || '·'}</td><td>${prat(r)}${r.ovPrat ? '<span class="ovt">editado</span>' : ''}</td><td>${BRL(r.tab)}${per(r)}</td><td><b>${BRL(r.sug)}${per(r)}</b>${r.ovSug ? '<span class="ovt">editado</span>' : ''}</td><td>${btns(r)}</td></tr>`).join('')}
     </tbody></table></div>
     <div class="best-l">${R.map(r => `<div class="bl"><div class="bl-h"><b>${esc(r.o.name)}</b><span class="badge">${r.n ? r.n + (r.n === 1 ? ' cliente' : ' clientes') : 'novo'}</span></div><small class="w">${esc(r.what)}</small>
       <div class="bl-v"><div><span>Praticado</span>${prat(r)}</div><div><span>Tabela</span><b>${BRL(r.tab)}${per(r)}</b></div><div><span>Sugerido</span><b>${BRL(r.sug)}${per(r)}</b></div></div>${btns(r)}</div>`).join('')}</div>
@@ -656,11 +663,21 @@ function bestHTML(){
   return `<section class="fr best${bestOpen ? ' open' : ''}"><button class="fh" data-bestt="1" aria-expanded="${bestOpen}"><div><div class="nm">Escopos mais vendidos</div><div class="ds">O que a FIRMA vende hoje, com praticado, tabela e sugerido</div></div>
     <span class="badge">${R.length} escopos</span><span class="chev"></span></button>${body}</section>`;
 }
-function addBest(i, mode){
+function bestEdit(i){ const r = bestRows().find(x => x.i === i); if (!r) return; const per = r.mensal ? ' por mês' : '';
+  modal(`<h3>Editar valores · ${esc(r.o.name)}</h3><p class="sub">${esc(r.what)} Tabela de referência: ${BRL(r.tab)}${per}.</p>
+    <form id="f-best" class="col" data-i="${i}">
+      <div class="g2"><label class="fl">Praticado FIRMA (R$${per})<input name="prat" inputmode="decimal" value="${fmtIn(r.prat)}"></label><label class="fl">Sugerido (R$${per})<input name="sug" inputmode="decimal" value="${fmtIn(r.sug)}"></label></div>
+      <div class="fl">Incluir na proposta com<div class="seg2"><label><input type="radio" name="use" value="sug" checked> Sugerido</label><label><input type="radio" name="use" value="prat"> Praticado</label><label><input type="radio" name="use" value="none"> Não incluir agora</label></div></div>
+      <div class="err" id="best-err"></div>
+      <div class="acts"><button type="button" class="f-btn" data-close="1">Cancelar</button><button type="submit" class="f-btn" name="go" value="prop">Usar só nesta proposta</button><button type="submit" class="f-btn pri" name="go" value="cat">Salvar no cardápio</button></div>
+    </form>`); }
+function addBest(i, mode, val){
   const r = bestRows().find(x => x.i === i); if (!r) return; const it = r.it, c = it.code;
-  if (!P.items[c]) { P.items[c] = {qty: r.qty, desc: 0, snap: snap(it), parts: r.parts ? clone(r.parts) : undefined}; (P.order = P.order||[]).push(c); if (mode === 'prat') P.items[c].fixed = r.prat; }
+  const fx = val > 0 ? val : mode === 'prat' ? r.prat : r.ovSug ? r.sug : 0;
+  const setFx = sl => { if (!fx) return; sl.bfx = sl.bfx || {}; if (!Object.keys(sl.bfx).length && +sl.fixed > 0) sl.bfx.x = +sl.fixed; sl.bfx[i] = fx; sl.fixed = Object.values(sl.bfx).reduce((t, v) => t + v, 0); };
+  if (!P.items[c]) { P.items[c] = {qty: r.qty, desc: 0, snap: snap(it), parts: r.parts ? clone(r.parts) : undefined}; (P.order = P.order||[]).push(c); setFx(P.items[c]); }
   else { const sl = P.items[c]; if (r.parts) { sl.parts = sl.parts || {}; Object.entries(r.parts).forEach(([k, v]) => { sl.parts[k] = Math.max(+sl.parts[k] || 0, v); }); } else sl.qty = r.qty;
-    if (mode === 'prat') sl.fixed = (+sl.fixed || 0) + r.prat; }
+    setFx(sl); }
   openF.add(it.front); markDirty(); render(); toast(r.o.name + ' incluído no escopo' + (mode === 'prat' ? ' com o preço praticado.' : ' com o preço sugerido.'));
 }
 
@@ -733,6 +750,9 @@ function paramsModal(){
       <label class="fl">Tabela de referência<input name="fonte" value="${esc(s.fonte)}"></label>
       <label class="fl">Ressalva na proposta<textarea name="ressalva">${esc(s.ressalva)}</textarea></label>
       <div class="g3"><label class="fl">Assinatura da FIRMA na proposta<input name="assinante" value="${esc(s.assinante||'')}"></label><label class="fl">Cargo de quem assina<input name="assinanteCargo" value="${esc(s.assinanteCargo||'')}" placeholder="opcional"></label></div>
+      <div class="sigb"><div class="sigp" id="sigp">${SIGIMG ? `<img src="${SIGIMG}" alt="Assinatura">` : '<span>Sem imagem: a assinatura sai com o nome digitado.</span>'}</div>
+        <div class="col" style="gap:6px"><label class="f-btn" style="cursor:pointer">Enviar imagem da assinatura<input type="file" id="sig-file" accept="image/png,image/jpeg,image/webp" hidden></label>
+        <small style="color:var(--muted);font-size:12px">Foto ou scan da assinatura em papel branco. O fundo é removido sozinho.</small>${SIGIMG ? '<button type="button" class="mini del" id="sig-del">Remover imagem</button>' : ''}</div></div>
       <label class="chk"><input type="checkbox" name="padrao" checked><span>Usar como padrão nas próximas propostas</span></label>
       <div class="err" id="par-err"></div>
       <div class="acts"><button type="button" class="f-btn" data-close="1">Cancelar</button><button class="f-btn pri" type="submit">Aplicar</button></div></form>`);
@@ -786,7 +806,7 @@ async function nextNumber(){
   return pre + String((n.length ? Math.max(...n) : 0) + 1).padStart(3, '0');
 }
 async function saveProp(quiet){
-  if (!P.client.trim() || !P.project.trim()) { toast('Preencha cliente e projeto antes de salvar.'); return false; }
+  if (!P.client.trim() || !P.project.trim()) { toast('Preencha cliente e empresa antes de salvar.'); return false; }
   if (!Object.keys(P.items).length) { toast('Marque pelo menos um item.'); return false; }
   const T = calc(P); const d = clone(P); d.updatedAt = new Date().toISOString(); d.by = me && me.email;
   d.totals = {mensal: T.mensal.price, unico: T.unico.price, contrato: T.contrato.price, margem: T.contrato.mg};
@@ -805,6 +825,8 @@ document.addEventListener('click', async e => {
   if (t.id === 'ov' || t.closest('[data-close]')) { closeModal(); return; }
   const cbo = t.closest('[data-cbo]'); if (cbo) { pickCb(+cbo.dataset.cbo); return; }
   if (t.closest('[data-bestt]')) { bestOpen = !bestOpen; try { sessionStorage.setItem('pp-best', bestOpen ? '1' : '0'); } catch(_) {} render(); return; }
+  if (t.id === 'sig-del') { try { await DB.put('pricing_settings', 'assinatura', {img: ''}); SIGIMG = ''; $('sigp').innerHTML = '<span>Sem imagem: a assinatura sai com o nome digitado.</span>'; t.remove(); toast('Imagem removida.'); } catch(err) { toast('Não foi possível remover.'); } return; }
+  const bed = t.closest('[data-bedit]'); if (bed) { bestEdit(+bed.dataset.bedit); return; }
   const bst = t.closest('[data-best]'); if (bst) { addBest(+bst.dataset.best, bst.dataset.bmode); return; }
   if (!t.closest('#cb')) closeCb();
   const sgb = t.closest('[data-sg]'); if (sgb) { useSugg(+sgb.dataset.sg); return; }
@@ -818,6 +840,7 @@ document.addEventListener('click', async e => {
     else if (k === 'save') saveProp();
     else if (k === 'pdf') exportPDF(a, P);
     else if (k === 'share') copyShare(a);
+    else if (k === 'copy') { const u = shareUrl(P); navigator.clipboard.writeText(u).then(() => toast('Link copiado.'), () => prompt('Copie o link da proposta:', u)); }
     else if (k === 'cnew') catModal(null);
     else if (k === 'preset') presetModal();
     return; }
@@ -828,7 +851,7 @@ document.addEventListener('click', async e => {
   if (t.closest('[data-stop]')) return;
   const it = t.closest('[data-it]'); if (it) { toggleItem(it.dataset.it); return; }
   const op = t.closest('[data-open]'); if (op) { if (dirty && !confirm('Descartar as alterações não salvas da proposta aberta?')) return; P = normProp(clone(PROPS.find(p => p.id === op.dataset.open))); dirty = false; saveDraft(); view = 'comp'; render(); return; }
-  const dp = t.closest('[data-dup]'); if (dp) { const s = normProp(clone(PROPS.find(p => p.id === dp.dataset.dup))); s.id = null; s.number = ''; s.date = todayISO(); s.project = s.project + ' (cópia)'; P = s; dirty = true; saveDraft(); view = 'comp'; render(); toast('Cópia aberta. Ajuste e salve para gerar o novo número.'); return; }
+  const dp = t.closest('[data-dup]'); if (dp) { const s = normProp(clone(PROPS.find(p => p.id === dp.dataset.dup))); s.id = null; s.number = ''; s.date = todayISO(); s.client = s.client; P = s; dirty = true; saveDraft(); view = 'comp'; render(); toast('Cópia aberta. Ajuste e salve para gerar o novo número.'); return; }
   const drf = t.closest('[data-draft]'); if (drf) { if (drf.dataset.draft === 'load' && DRAFT) { P = normProp(DRAFT); dirty = true; } DRAFT = null; saveDraft(); render(); return; }
   const pfb = t.closest('[data-pf]'); if (pfb) { propF = pfb.dataset.pf; render(); return; }
   const pl = t.closest('[data-plink]'); if (pl) { const pr = normProp(clone(PROPS.find(p => p.id === pl.dataset.plink))); pl.disabled = true;
@@ -857,7 +880,7 @@ document.addEventListener('input', e => {
       if (t.checked) sl.parts[pid] = +pt.qty || 1; else delete sl.parts[pid]; markDirty(); render(); } return; }
   if (t.dataset.pq) { const [c, pid] = t.dataset.pq.split('|'), sl = P.items[c]; if (sl && sl.parts) { sl.parts[pid] = Math.max(0, numIn(t.value)); markDirty(); refreshNums(); } return; }
   if (t.dataset.q) { const s = P.items[t.dataset.q]; if (s) { s.qty = Math.max(0, numIn(t.value)); markDirty(); refreshNums(); } return; }
-  if (t.dataset.fx) { const s = P.items[t.dataset.fx]; if (s) { const v = numIn(t.value); if (v > 0) s.fixed = v; else delete s.fixed; markDirty(); refreshNums(); } return; }
+  if (t.dataset.fx) { const s = P.items[t.dataset.fx]; if (s) { const v = numIn(t.value); delete s.bfx; if (v > 0) s.fixed = v; else delete s.fixed; markDirty(); refreshNums(); } return; }
   if (t.dataset.d) { const s = P.items[t.dataset.d]; if (s) { s.desc = Math.min(100, Math.max(0, numIn(t.value))); markDirty(); refreshNums(); } return; }
   if (t.id === 'dx') { P.descExtra = Math.min(100, Math.max(0, numIn(t.value))); markDirty(); refreshNums(); return; }
 });
@@ -865,8 +888,33 @@ function refreshNums(){ const T = calc(P), sd = $('side'); if (sd) { const f = d
   const dc = $('disc'); if (dc) dc.innerHTML = discTable(T);
   document.querySelectorAll('[data-badge]').forEach(el => { el.outerHTML = frontBadge(el.dataset.badge, T, +el.dataset.total); });
   document.querySelectorAll('[data-it]').forEach(el => { const L = T.lines.find(l => l.code === el.dataset.it), lt = el.querySelector('.lt'); if (lt) lt.textContent = L ? BRL(L.price) + (L.rec === 'mensal' ? '/mês' : '') : ''; }); }
+async function sigProcess(file){
+  const url = URL.createObjectURL(file), img = await new Promise((ok, no) => { const i = new Image(); i.onload = () => ok(i); i.onerror = no; i.src = url; });
+  const sc = Math.min(1, 1400 / img.width), c = document.createElement('canvas'); c.width = Math.round(img.width*sc); c.height = Math.round(img.height*sc);
+  const x = c.getContext('2d'); x.drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(url);
+  const d = x.getImageData(0, 0, c.width, c.height), a = d.data; let x0 = c.width, y0 = c.height, x1 = 0, y1 = 0;
+  for (let i = 0; i < a.length; i += 4) { const l = 0.299*a[i] + 0.587*a[i+1] + 0.114*a[i+2]; const al = l > 200 ? 0 : l < 120 ? 255 : Math.round((200 - l) / 80 * 255);
+    a[i] = a[i+1] = a[i+2] = 15; a[i+3] = Math.min(a[i+3], al); if (a[i+3] > 40) { const p = i/4, px = p % c.width, py = (p / c.width) | 0; if (px < x0) x0 = px; if (px > x1) x1 = px; if (py < y0) y0 = py; if (py > y1) y1 = py; } }
+  if (x1 <= x0 || y1 <= y0) throw new Error('vazia');
+  x.putImageData(d, 0, 0); const pad = 6, w = x1 - x0 + 2*pad, h = y1 - y0 + 2*pad, o = document.createElement('canvas'), k = Math.min(1, 700 / w);
+  o.width = Math.round(w*k); o.height = Math.round(h*k); o.getContext('2d').drawImage(c, x0 - pad, y0 - pad, w, h, 0, 0, o.width, o.height);
+  return o.toDataURL('image/png'); }
+document.addEventListener('change', async e => {
+  if (e.target.id !== 'sig-file' || !e.target.files[0]) return;
+  try { const img = await sigProcess(e.target.files[0]); await DB.put('pricing_settings', 'assinatura', {img, at: new Date().toISOString(), by: me && me.email}); SIGIMG = img;
+    $('sigp').innerHTML = `<img src="${img}" alt="Assinatura">`; toast('Assinatura salva. Vale para as próximas propostas e links.'); }
+  catch(err) { console.error(err); toast('Não foi possível ler a imagem. Use uma foto nítida em papel branco.'); }
+});
 document.addEventListener('submit', async e => {
   e.preventDefault(); const f = e.target;
+  if (f.id === 'f-best') { const i = +f.dataset.i, r = bestRows().find(x => x.i === i); if (!r) { closeModal(); return; }
+    const prat = numIn(f.elements.prat.value), sug = numIn(f.elements.sug.value), use = f.elements.use.value, go = (e.submitter && e.submitter.value) || 'prop';
+    if (!(prat > 0) || !(sug > 0)) { $('best-err').textContent = 'Informe valores maiores que zero.'; return; }
+    if (go === 'cat') { const k = r.b.opp + '|' + r.b.code, keep = clone(BOV); BOV[k] = {prat, sug, at: new Date().toISOString(), by: me && me.email};
+      try { await DB.put('pricing_settings', 'best', {ov: BOV}); } catch(err) { BOV = keep; $('best-err').textContent = 'Não foi possível salvar no cardápio.'; return; } }
+    closeModal();
+    if (use !== 'none') addBest(i, use, use === 'prat' ? prat : sug); else render();
+    toast(go === 'cat' ? r.o.name + ': valores salvos no cardápio.' : r.o.name + ': valor usado só nesta proposta.'); return; }
   if (f.id === 'f-par') { const g = n => f.elements[n].value, s = P.params;
     ['descPadrao','reajuste','arred','imposto','custoOp','custoDir'].forEach(k => s[k] = Math.max(0, numIn(g(k))));
     if (s.descPadrao > 100 || s.imposto + s.custoOp + s.custoDir > 100) { $('par-err').textContent = 'Percentuais acima de 100% não fecham a conta.'; return; }
@@ -918,21 +966,21 @@ function propConds(p, T){ const s = p.params, val = p.validade ? dBR(addDays(p.d
   if (p.mostrarRef) cond.push(['Referência', 'Valores de referência: ' + s.fonte + ', atualizados em ' + PCT2(s.reajuste/100) + ' (' + s.reajusteNota + ').']);
   return cond; }
 function shareSnap(p){ const T = calc(p), s = p.params;
-  return {number: p.number || '', client: p.client, project: p.project, contact: p.contact || '', date: p.date, validUntil: p.validade ? addDays(p.date, p.validade) : null,
+  return {number: p.number || '', client: coName(p), project: '', company: coName(p), person: (p.client||'').trim(), role: (p.contact||'').trim(), contact: personLine(p), date: p.date, validUntil: p.validade ? addDays(p.date, p.validade) : null,
     mensal: T.mensal.n ? T.mensal.price : 0, unico: T.unico.n ? T.unico.price : 0,
     ref: p.mostrarRef ? {tabela: T.mensal.n ? T.mensal.tabela : T.unico.tabela, mensal: !!T.mensal.n} : null,
     fronts: FRONTS.map(([k, nm]) => ({name: nm, lines: T.lines.filter(l => l.it.front === k).map(l => ({name: l.it.name, desc: lineDesc(l), q: qtyLabel(l), price: l.price, rec: l.rec}))})).filter(f => f.lines.length),
-    cond: propConds(p, T), signer: {name: s.assinante || '', role: s.assinanteCargo || ''}, updatedAt: new Date().toISOString()}; }
+    cond: propConds(p, T), signer: {name: s.assinante || '', role: s.assinanteCargo || '', img: SIGIMG || ''}, updatedAt: new Date().toISOString()}; }
 const newToken = () => { const a = new Uint8Array(18); crypto.getRandomValues(a); return Array.from(a, b => b.toString(16).padStart(2, '0')).join(''); };
 async function ensureShare(p){
   if (!p.share) { p.share = newToken(); if (p === P) { const ok = await saveProp(true); if (!ok) { p.share = null; return null; } } else await DB.put('pricing_proposals', p.id, p); }
   if (!SHARES[p.share]) await DB.share(p.share, shareSnap(p));
-  return ACEITE + '?t=' + p.share + (slug(p.client) ? '&c=' + slug(p.client) : ''); }
+  return ACEITE + '?t=' + p.share + (slug(coName(p)) ? '&c=' + slug(coName(p)) : ''); }
 async function copyShare(btn){
-  if (!P.client.trim() || !P.project.trim()) { toast('Preencha cliente e projeto para gerar o link.'); return; }
+  if (!P.client.trim() || !P.project.trim()) { toast('Preencha cliente e empresa para gerar o link.'); return; }
   if (dirty || !P.id) { const ok = await saveProp(true); if (!ok) return; }
   btn.disabled = true;
-  try { const url = await ensureShare(P); if (!url) return; try { await navigator.clipboard.writeText(url); toast('Link da proposta ' + (propName(P) || '') + ' copiado. Nome e escopo atualizados.'); } catch(_) { prompt('Copie o link da proposta:', url); } render(); }
+  try { const url = await ensureShare(P); if (!url) return; try { await navigator.clipboard.writeText(url); toast('Link da proposta copiado, com nome e escopo atualizados.'); } catch(_) { prompt('Copie o link da proposta:', url); } render(); }
   catch(e) { console.error(e); toast('Não foi possível gerar o link de aceite.'); }
   finally { if (btn.isConnected) btn.disabled = false; } }
 
@@ -940,21 +988,21 @@ async function buildPDF(p, ex){
   ex = ex || {};
   const {jsPDF} = window.jspdf, doc = new jsPDF({unit: 'mm', format: 'a4'}), T = calc(p), s = p.params;
   const W = 210, H = 297, M = 18, CW = W - 2*M, BOT = 270;
-  const flogo = await imgData('firma.png'), clogo = await clientLogo(p.client);
+  const flogo = await imgData('firma.png'), clogo = (await clientLogo(p.project)) || (await clientLogo(p.client));
   const F = (w, z) => { doc.setFont('helvetica', w); doc.setFontSize(z); };
   const ink = () => doc.setTextColor(10,10,10), mute = () => doc.setTextColor(110,110,110), grey = () => doc.setTextColor(166,166,166), white = () => doc.setTextColor(255,255,255);
   const fit = (img, mw, mh) => { const r = Math.min(mw/img.w, mh/img.h); return [img.w*r, img.h*r]; };
   const num = p.number || 'Rascunho', dt = dBR(p.date), val = p.validade ? dBR(addDays(p.date, p.validade)) : '';
   function head(){ if (flogo) { const [w,h] = fit(flogo, 12, 13); doc.addImage(flogo.data, 'PNG', M, 12, w, h); }
-    F('bold', 7.5); mute(); doc.text('PROPOSTA COMERCIAL', M + 17, 16.5); F('normal', 11); ink(); doc.text(doc.splitTextToSize(p.project || 'Projeto', 110)[0], M + 17, 22.5);
+    F('bold', 7.5); mute(); doc.text('PROPOSTA COMERCIAL', M + 17, 16.5); F('normal', 11); ink(); doc.text(doc.splitTextToSize(coName(p) || 'Proposta', 110)[0], M + 17, 22.5);
     F('normal', 8.5); mute(); doc.text(num, W - M, 16.5, {align: 'right'}); doc.text(dt, W - M, 22.5, {align: 'right'});
     doc.setDrawColor(230,230,230); doc.setLineWidth(.2); doc.line(M, 29, W - M, 29); }
   let y = 0; const newPage = () => { doc.addPage(); head(); y = 38; }; const need = h => { if (y + h > BOT) newPage(); };
   head(); y = 42;
   // Para
   F('bold', 7.5); mute(); doc.text('PREPARADA PARA', M, y); y += 7;
-  F('bold', 22); ink(); const cn = doc.splitTextToSize(p.client || 'Cliente', clogo ? CW - 52 : CW); doc.text(cn, M, y + 1); y += cn.length*8.5;
-  F('normal', 10.5); mute(); const pl = doc.splitTextToSize([p.project, p.contact].filter(Boolean).join('  ·  '), clogo ? CW - 52 : CW); doc.text(pl, M, y); y += pl.length*5 + 2;
+  F('bold', 22); ink(); const cn = doc.splitTextToSize(coName(p) || 'Cliente', clogo ? CW - 52 : CW); doc.text(cn, M, y + 1); y += cn.length*8.5;
+  F('normal', 10.5); mute(); const pl = doc.splitTextToSize(personLine(p) ? 'A/C ' + personLine(p) : '', clogo ? CW - 52 : CW); doc.text(pl, M, y); y += pl.length*5 + 2;
   if (clogo) { const [w,h] = fit(clogo, 44, 20); doc.addImage(clogo.data, 'PNG', W - M - w, 40, w, h); y = Math.max(y, 40 + h + 4); }
   y += 4;
   // Investimento
@@ -967,17 +1015,6 @@ async function buildPDF(p, ex){
     doc.setDrawColor(60,60,60); doc.line(M + 8, y + 31, W - M - 8, y + 31);
     F('normal', 8.5); grey(); doc.text('Valor de mercado (tabela Sinapro): ' + BRL2(t.tabela) + sf + '   ·   Condição FIRMA: ' + PCT(t.tabela ? save/t.tabela : 0) + ' abaixo do mercado', M + 8, y + 38); }
   y += bh + 12;
-  // Por que a FIRMA
-  const WHY = [['13 anos e mais de 500 projetos', 'Experiência acumulada com marcas de diferentes setores, do varejo à indústria, da saúde ao agro.'],
-    ['Um só time de marketing, tecnologia e IA', 'A FIRMA atua como o departamento de marketing, tech e IA da sua empresa, com estratégia, criação, mídia e dados no mesmo lugar.'],
-    ['Método DATA FIRMA', 'Medimos a maturidade digital da marca no início e acompanhamos a evolução com números, não com impressões.'],
-    ['Lideranças obcecadas pelo seu resultado', 'Cada frente é comandada por especialistas que respondem por metas, sob a mesma cultura de compromisso.']];
-  need(60); F('bold', 12); ink(); doc.text('Por que a FIRMA', M, y); y += 6;
-  const gw = (CW - 6) / 2; let maxh = 0;
-  WHY.forEach(([h, d], i) => { const col = i % 2, x = M + col*(gw + 6); if (col === 0 && i) { y += maxh + 4; maxh = 0; }
-    F('normal', 8.5); const dl = doc.splitTextToSize(d, gw - 12); const hh = 12 + dl.length*3.9 + 4; maxh = Math.max(maxh, hh);
-    doc.setFillColor(244,244,244); doc.roundedRect(x, y, gw, hh, 3, 3, 'F'); F('bold', 9.5); ink(); doc.text(h, x + 6, y + 8); F('normal', 8.5); doc.setTextColor(61,61,61); doc.text(dl, x + 6, y + 13.5); });
-  y += maxh + 12;
   // Escopo
   F('bold', 12); ink(); doc.text('Escopo da proposta', M, y); y += 8;
   const xQ = W - M - 62, xV = W - M;
@@ -1008,20 +1045,21 @@ async function buildPDF(p, ex){
   // FIRMA
   doc.setFillColor(244,244,244); doc.roundedRect(M, top, sw, 56, 3, 3, 'F'); doc.roundedRect(x2, top, sw, 56, 3, 3, 'F');
   F('bold', 7); mute(); doc.text('PELA FIRMA', M + 6, top + 8); doc.text('PELO CLIENTE', x2 + 6, top + 8);
-  if (sgn) { doc.setFont('times', 'italic'); doc.setFontSize(22); ink(); doc.text(sgn, M + 6, top + 26); }
+  if (SIGIMG) { try { const si = await imgData(SIGIMG); if (si) { const [w, h] = fit(si, sw - 16, 17); doc.addImage(si.data, 'PNG', M + 6, top + 28.5 - h, w, h); } } catch(_) {} }
+  else if (sgn) { doc.setFont('times', 'italic'); doc.setFontSize(22); ink(); doc.text(sgn, M + 6, top + 26); }
   doc.setDrawColor(10,10,10); doc.line(M + 6, top + 30, M + sw - 6, top + 30);
   F('bold', 9); ink(); doc.text(doc.splitTextToSize([sgn || '[a preencher]', s.assinanteCargo].filter(Boolean).join(', '), sw - 12)[0], M + 6, top + 35);
   F('normal', 7.5); mute(); doc.text('FIRMA  ·  CNPJ 20.431.153/0001-09', M + 6, top + 40); if (sgn) doc.text('Assinado eletronicamente em ' + dt, M + 6, top + 44.5);
   // Cliente
   if (acc) { doc.setFont('times', 'italic'); doc.setFontSize(20); ink(); doc.text(doc.splitTextToSize(acc.name, sw - 12)[0], x2 + 6, top + 26);
     doc.line(x2 + 6, top + 30, x2 + sw - 6, top + 30); F('bold', 9); ink(); doc.text(doc.splitTextToSize([acc.name, acc.role].filter(Boolean).join(', '), sw - 12)[0], x2 + 6, top + 35);
-    F('normal', 7.5); mute(); doc.text(doc.splitTextToSize([p.client, acc.doc].filter(Boolean).join('  ·  '), sw - 12)[0], x2 + 6, top + 40); doc.text('Aceite formalizado eletronicamente em ' + dtBR(acc.at), x2 + 6, top + 44.5); }
+    F('normal', 7.5); mute(); doc.text(doc.splitTextToSize([coName(p), acc.doc].filter(Boolean).join('  ·  '), sw - 12)[0], x2 + 6, top + 40); doc.text('Aceite formalizado eletronicamente em ' + dtBR(acc.at), x2 + 6, top + 44.5); }
   else if (url) { const tw = sw - 12;
     F('bold', 11); ink(); doc.text('Formalize o aceite online', x2 + 6, top + 17);
     F('normal', 8); doc.setTextColor(61,61,61); doc.text(doc.splitTextToSize('Acesse pelo link abaixo, confira o escopo e formalize o aceite com seu nome e e-mail.', tw), x2 + 6, top + 23);
     const bw = tw, by = top + 33; doc.setFillColor(10,10,10); doc.roundedRect(x2 + 6, by, bw, 9, 4.5, 4.5, 'F'); F('bold', 8.5); white(); doc.text('Acessar proposta e formalizar aceite', x2 + 6 + bw/2, by + 5.9, {align: 'center'}); doc.link(x2 + 6, by, bw, 9, {url});
     F('normal', 6.5); mute(); const ul = doc.splitTextToSize(url, tw); doc.textWithLink(ul[0], x2 + 6, by + 13.5, {url}); if (ul[1]) doc.textWithLink(ul[1], x2 + 6, by + 16.5, {url}); }
-  else { doc.line(x2 + 6, top + 30, x2 + sw - 6, top + 30); F('bold', 9); ink(); doc.text(doc.splitTextToSize(p.client || 'Cliente', sw - 12)[0], x2 + 6, top + 35);
+  else { doc.line(x2 + 6, top + 30, x2 + sw - 6, top + 30); F('bold', 9); ink(); doc.text(doc.splitTextToSize(coName(p) || 'Cliente', sw - 12)[0], x2 + 6, top + 35);
     F('normal', 7.5); mute(); doc.text('Assinatura digital enviada via ClickSign.', x2 + 6, top + 40); }
   y = top + 62;
   if (acc || url) { F('normal', 6.8); grey(); doc.text(doc.splitTextToSize('Aceite eletrônico com registro de data, hora, IP e identificação do signatário, nos termos da MP 2.200-2/2001, art. 10, § 2º, e da Lei 14.063/2020.', CW), M, y); }
@@ -1032,11 +1070,11 @@ async function buildPDF(p, ex){
 }
 async function exportPDF(btn, p){
   if (!window.jspdf) { toast('O gerador de PDF não carregou. Recarregue a página.'); return; }
-  if (!p.client.trim() || !p.project.trim()) { toast('Preencha cliente e projeto para gerar a proposta.'); return; }
+  if (!p.client.trim() || !p.project.trim()) { toast('Preencha cliente e empresa para gerar a proposta.'); return; }
   if (p === P && (dirty || !P.id)) { const ok = await saveProp(); if (!ok) return; p = P; }
   const old = btn.innerHTML; btn.disabled = true; btn.textContent = 'Gerando…';
   let ex = {}; try { if (p.share && SHARES[p.share]) ex.acc = SHARES[p.share]; else ex.url = await ensureShare(p); } catch(e) { console.warn('aceite', e); }
-  try { const doc = await buildPDF(p, ex); window.__lastPdf = doc; const name = 'Proposta-FIRMA-' + slug(p.client) + '-' + slug(p.project) + (p.number ? '-' + p.number : '') + '.pdf';
+  try { const doc = await buildPDF(p, ex); window.__lastPdf = doc; const name = 'Proposta-FIRMA-' + slug(coName(p)) + (p.number ? '-' + p.number : '') + '.pdf';
     const b = new Blob([doc.output('arraybuffer')], {type: 'application/pdf'}), a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500); }
   catch(e) { console.error(e); toast('Erro ao gerar o PDF.'); }
   if (btn.isConnected) { btn.disabled = false; btn.innerHTML = old; }
@@ -1053,6 +1091,8 @@ async function boot(){
     try { OPPCAT = await DB.all('catalog'); } catch(_) { OPPCAT = []; }
     await loadAccepts();
     const pz = set.find(r => r.id === 'presets'); PRESETS = pz && Array.isArray(pz.list) ? pz.list : [];
+    const bz = set.find(r => r.id === 'best'); BOV = bz && bz.ov ? bz.ov : {};
+    const sz = set.find(r => r.id === 'assinatura'); SIGIMG = sz && sz.img ? sz.img : '';
     let draft = null; try { draft = JSON.parse(sessionStorage.getItem('pp-draft') || 'null'); } catch(_) {}
     P = newProp(); dirty = false;
     DRAFT = draft && draft.items && (Object.keys(draft.items).length || (draft.client||'').trim()) && !(draft.id && !draftDirty(draft)) ? draft : null;
