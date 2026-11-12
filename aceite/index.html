@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title>Proposta FIRMA · Aprovação</title>
+<title>Proposta FIRMA</title>
 <link rel="icon" href="../firma.png">
 <style>
 :root{--ink:#0a0a0a;--ink2:#3d3d3d;--muted:#6e6e6e;--line:#e6e6e6;--surface:#f4f4f4;--bg:#fff}
@@ -95,9 +95,9 @@ function page(){
   const tots = (d.mensal ? `<div class="tot"><span>Investimento mensal</span><b>${BRL(d.mensal)}/mês</b></div>` : '') + (d.unico ? `<div class="tot"><span>Projetos e entregas únicas</span><b>${BRL(d.unico)}</b></div>` : '');
   const cond = (d.cond || []).map(([l, v]) => `<b>${esc(l)}</b><span>${esc(v)}</span>`).join('');
   const firma = `<div><small>PELA FIRMA</small><div class="n">${esc(sgn.name || '')}</div><b style="font-size:14px">${esc([sgn.name, sgn.role].filter(Boolean).join(', '))}</b><p>FIRMA · CNPJ 20.431.153/0001-09${sgn.name ? '<br>Assinado eletronicamente em ' + esc(dBR(d.date)) : ''}</p></div>`;
-  const cli = ACC ? `<div><small>PELO CLIENTE</small><div class="n">${esc(ACC.name)}</div><b style="font-size:14px">${esc([ACC.name, ACC.role].filter(Boolean).join(', '))}</b><p>${esc([d.client, ACC.doc].filter(Boolean).join(' · '))}<br>Aprovado eletronicamente em ${esc(dtBR(ACC.at))}</p></div>`
-    : `<div><small>PELO CLIENTE</small><div class="n" id="pv"></div><b style="font-size:14px">${esc(d.client)}</b><p>Sua assinatura aparece aqui ao aprovar.</p></div>`;
-  const form = ACC ? `<div class="done"><div class="ck">✓</div><h3>Proposta aprovada</h3><p>Obrigado, ${esc(ACC.name.split(' ')[0])}. A FIRMA já recebeu sua aprovação e entra em contato para o início do projeto.</p></div>`
+  const cli = ACC ? `<div><small>PELO CLIENTE</small><div class="n">${esc(ACC.name)}</div><b style="font-size:14px">${esc([ACC.name, ACC.role].filter(Boolean).join(', '))}</b><p>${esc([d.client, ACC.doc].filter(Boolean).join(' · '))}<br>Aceite formalizado eletronicamente em ${esc(dtBR(ACC.at))}</p></div>`
+    : `<div><small>PELO CLIENTE</small><div class="n" id="pv"></div><b style="font-size:14px">${esc(d.client)}</b><p>Sua assinatura aparece aqui ao formalizar.</p></div>`;
+  const form = ACC ? `<div class="done"><div class="ck">✓</div><h3>Aceite formalizado</h3><p>Obrigado, ${esc(ACC.name.split(' ')[0])}. A FIRMA já recebeu o aceite e entra em contato para o início do projeto.</p></div>`
     : expired ? `<div class="done"><h3>Esta proposta venceu em ${esc(dBR(d.validUntil))}</h3><p>Fale com a FIRMA para receber uma versão atualizada.</p></div>`
     : `<form id="f" novalidate>
         <label>Nome completo<input type="text" name="name" autocomplete="name" required></label>
@@ -106,7 +106,7 @@ function page(){
         <label><span>Cargo <span class="o">(opcional)</span></span><input type="text" name="role" autocomplete="organization-title"></label>
         <label class="chk full"><input type="checkbox" name="ok"><span>Li e aprovo a proposta ${esc(d.number)} de ${esc(d.client)}, com o escopo, os valores e as condições acima, e autorizo o início do projeto.</span></label>
         <div class="err full" id="err"></div>
-        <button class="full" id="go" type="submit">Aprovar proposta</button>
+        <button class="full" id="go" type="submit">Formalizar aceite</button>
       </form>`;
   app.innerHTML = `<header><img src="../firma.png" alt="FIRMA"><div><small>PROPOSTA COMERCIAL</small><b>${esc(d.project)}</b></div><div class="r">${esc(d.number)}<br>${esc(dBR(d.date))}</div></header>
     <div class="eb">PREPARADA PARA</div><h1>${esc(d.client)}</h1><p class="sub">${esc([d.project, d.contact].filter(Boolean).join(' · '))}</p>
@@ -114,7 +114,7 @@ function page(){
     <h2>Por que a FIRMA</h2><div class="why">${WHY.map(([h, p]) => `<div><b>${esc(h)}</b><p>${esc(p)}</p></div>`).join('')}</div>
     <h2>Escopo da proposta</h2>${scope}<div style="margin-top:8px">${tots}</div>
     ${cond ? `<h2>Condições</h2><div class="cd">${cond}</div>` : ''}
-    <h2 id="aceite">${ACC ? 'Aprovação' : 'Aprovar proposta'}</h2>
+    <h2 id="aceite">${ACC ? 'Aceite formalizado' : 'Formalizar aceite'}</h2>
     <div class="box"><div class="sig">${firma}${cli}</div>${form}
       <p class="legal">Aceite eletrônico com registro de data, hora, IP e identificação do signatário, admitido entre as partes nos termos da MP 2.200-2/2001, art. 10, § 2º, e da Lei 14.063/2020. Se preferir, a FIRMA envia esta proposta para assinatura digital via ClickSign.</p></div>
     ${foot()}`;
@@ -124,13 +124,13 @@ function page(){
     const name = g('name'), email = g('email');
     if (name.split(/\s+/).length < 2) { $('err').textContent = 'Informe nome e sobrenome.'; return; }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { $('err').textContent = 'Informe um e-mail válido.'; return; }
-    if (!f.elements.ok.checked) { $('err').textContent = 'Marque a caixa de aprovação para continuar.'; return; }
-    $('err').textContent = ''; $('go').disabled = true; $('go').textContent = 'Registrando aprovação…';
+    if (!f.elements.ok.checked) { $('err').textContent = 'Marque a caixa de aceite para continuar.'; return; }
+    $('err').textContent = ''; $('go').disabled = true; $('go').textContent = 'Registrando aceite…';
     try { const {data, error} = await sb.rpc('share_accept', {t: token, nome: name, email, doc: g('doc'), cargo: g('role')}); if (error) throw error;
       ACC = data; page(); $('aceite').scrollIntoView({behavior: 'smooth', block: 'start'}); }
     catch(err) { console.error(err); const m = String(err.message || '');
       $('err').textContent = m.includes('expired') ? 'Esta proposta venceu. Fale com a FIRMA.' : 'Não foi possível registrar agora. Tente de novo em instantes.';
-      $('go').disabled = false; $('go').textContent = 'Aprovar proposta'; } });
+      $('go').disabled = false; $('go').textContent = 'Formalizar aceite'; } });
 }
 
 (async () => {

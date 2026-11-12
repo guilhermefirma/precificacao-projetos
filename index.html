@@ -304,7 +304,6 @@ td .badge{display:inline-block;margin-top:4px;font-size:11px;padding:2px 9px}.ba
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <script>
 'use strict';
 /* ---------- configuração ---------- */
@@ -325,7 +324,7 @@ const REF = [["Anúncio até 1/4 de página",1478],["Anúncio até 1/2 página",
 const DEF = {reajuste: 4.62, reajusteNota: 'IPCA-15 acumulado em 12 meses (out/2026)', descPadrao: 60, imposto: 20, custoOp: 20, custoDir: 10, arred: 10,
   validade: 15, meses: 12, mostrarRef: true, pagamento: '',
   fonte: 'Sinapro-SC, Valores Referenciais de Serviços Internos nº 42, vigente desde 01/04/2025',
-  assinante: 'Vitor Horvat', assinanteCargo: '',
+  assinante: 'Vitor Horvath', assinanteCargo: '',
   ressalva: 'Produção de terceiros (filmagem, fotografia, gravação), verba de mídia, cachês de influenciadores, licenças e ferramentas são orçados à parte.'};
 
 /* ---------- utilidades ---------- */
@@ -373,7 +372,7 @@ let SHARES = {}; const ACEITE = 'https://guilhermefirma.github.io/precificacao-p
 let CAT = [], SET = clone(DEF), CLIENTS = [], PROPS = [], PRESETS = [], OPPCAT = [], CBOPTS = [], cbIdx = 0, P = null, view = 'comp', seg = 'mensal', openF = new Set(['growth']), ready = false, denied = false, offline = false, dirty = false, sideOpen = false;
 function newProp(){ return {id: null, number: '', client: '', project: '', contact: '', date: todayISO(), validade: SET.validade, meses: SET.meses, pagamento: SET.pagamento || '', obs: '',
   descExtra: 0, mostrarRef: SET.mostrarRef !== false, params: paramsFrom(SET), items: {}, order: []}; }
-function paramsFrom(s){ return {reajuste: +s.reajuste||0, reajusteNota: s.reajusteNota||'', descPadrao: +s.descPadrao||0, imposto: +s.imposto||0, custoOp: +s.custoOp||0, custoDir: +s.custoDir||0, arred: +s.arred||0, fonte: s.fonte||'', ressalva: s.ressalva||'', assinante: s.assinante == null ? 'Vitor Horvat' : s.assinante, assinanteCargo: s.assinanteCargo||''}; }
+function paramsFrom(s){ return {reajuste: +s.reajuste||0, reajusteNota: s.reajusteNota||'', descPadrao: +s.descPadrao||0, imposto: +s.imposto||0, custoOp: +s.custoOp||0, custoDir: +s.custoDir||0, arred: +s.arred||0, fonte: s.fonte||'', ressalva: s.ressalva||'', assinante: s.assinante == null || s.assinante === 'Vitor Horvat' ? 'Vitor Horvath' : s.assinante, assinanteCargo: s.assinanteCargo||''}; }
 function snap(it){ return {code: it.code, front: it.front, name: it.name, desc: it.desc, rec: it.rec, unit: it.unit, ref: +it.ref||0, basis: it.basis||[], parts: it.parts && it.parts.length ? clone(it.parts) : undefined}; }
 function saveDraft(){ try { sessionStorage.setItem('pp-draft', JSON.stringify(P)); } catch(_) {} }
 function markDirty(){ dirty = true; saveDraft(); const st = $('pst'); if (st) st.textContent = 'Alterações não salvas'; }
@@ -515,7 +514,7 @@ function itemCard(it){
 }
 function accHTML(T){ const a = P.share && SHARES[P.share];
   if (a) return `<div class="acc ok"><b>Aprovada por ${esc(a.name)}</b><small>${esc(dtBR(a.at))}${a.email ? ' · ' + esc(a.email) : ''}</small></div>`;
-  return `<button class="sbtn acc-b" data-a="share" ${T.contrato.n ? '' : 'disabled'} style="flex:none">${P.share ? 'Copiar link de aceite' : 'Gerar link de aceite do cliente'}</button>`; }
+  return `<button class="sbtn acc-b" data-a="share" ${T.contrato.n ? '' : 'disabled'} style="flex:none">${P.share ? 'Copiar link da proposta' : 'Gerar link da proposta com aceite'}</button>`; }
 function sideHTML(T){
   const s = P.params, t = T[seg], ded = s.imposto + s.custoOp + s.custoDir;
   const lbl = {contrato: 'Valor do contrato', mensal: 'Mensalidade', unico: 'Itens únicos'}[seg];
@@ -888,11 +887,9 @@ async function copyShare(btn){
   if (!P.client.trim() || !P.project.trim()) { toast('Preencha cliente e projeto para gerar o link.'); return; }
   if (dirty || !P.id) { const ok = await saveProp(true); if (!ok) return; }
   btn.disabled = true;
-  try { const url = await ensureShare(P); if (!url) return; try { await navigator.clipboard.writeText(url); toast('Link de aceite copiado. Envie ao cliente junto com o PDF.'); } catch(_) { prompt('Copie o link de aceite:', url); } render(); }
+  try { const url = await ensureShare(P); if (!url) return; try { await navigator.clipboard.writeText(url); toast('Link da proposta copiado. O cliente acessa e formaliza o aceite por ele.'); } catch(_) { prompt('Copie o link da proposta:', url); } render(); }
   catch(e) { console.error(e); toast('Não foi possível gerar o link de aceite.'); }
   finally { if (btn.isConnected) btn.disabled = false; } }
-function qrDraw(doc, text, x, y, size){ if (!window.qrcode) return false; const q = qrcode(0, 'M'); q.addData(text); q.make(); const n = q.getModuleCount(), c = size/n;
-  doc.setFillColor(10,10,10); for (let r = 0; r < n; r++) for (let k = 0; k < n; k++) if (q.isDark(r, k)) doc.rect(x + k*c, y + r*c, c + .02, c + .02, 'F'); return true; }
 
 async function buildPDF(p, ex){
   ex = ex || {};
@@ -961,7 +958,7 @@ async function buildPDF(p, ex){
   // Aceite
   const acc = ex.acc, url = ex.url, sgn = (s.assinante || '').trim();
   need(80); y += 4; F('bold', 12); ink(); doc.text('Aceite', M, y); y += 6;
-  F('normal', 9); doc.setTextColor(61,61,61); doc.text(doc.splitTextToSize('Ao aprovar, o cliente concorda com o escopo, os valores e as condições desta proposta, que passa a valer como autorização para o início do projeto.', CW), M, y + 2); y += 12;
+  F('normal', 9); doc.setTextColor(61,61,61); doc.text(doc.splitTextToSize('Ao formalizar o aceite, o cliente concorda com o escopo, os valores e as condições desta proposta, que passa a valer como autorização para o início do projeto.', CW), M, y + 2); y += 12;
   const sw = (CW - 12)/2, x2 = M + sw + 12, top = y;
   // FIRMA
   doc.setFillColor(244,244,244); doc.roundedRect(M, top, sw, 56, 3, 3, 'F'); doc.roundedRect(x2, top, sw, 56, 3, 3, 'F');
@@ -973,16 +970,16 @@ async function buildPDF(p, ex){
   // Cliente
   if (acc) { doc.setFont('times', 'italic'); doc.setFontSize(20); ink(); doc.text(doc.splitTextToSize(acc.name, sw - 12)[0], x2 + 6, top + 26);
     doc.line(x2 + 6, top + 30, x2 + sw - 6, top + 30); F('bold', 9); ink(); doc.text(doc.splitTextToSize([acc.name, acc.role].filter(Boolean).join(', '), sw - 12)[0], x2 + 6, top + 35);
-    F('normal', 7.5); mute(); doc.text(doc.splitTextToSize([p.client, acc.doc].filter(Boolean).join('  ·  '), sw - 12)[0], x2 + 6, top + 40); doc.text('Aprovado eletronicamente em ' + dtBR(acc.at), x2 + 6, top + 44.5); }
-  else if (url) { const qs = 30, qx = x2 + sw - 6 - qs; doc.setFillColor(255,255,255); doc.roundedRect(qx - 2, top + 12, qs + 4, qs + 4, 2, 2, 'F'); qrDraw(doc, url, qx, top + 14, qs);
-    const tw = qx - x2 - 12; F('bold', 11); ink(); doc.text(doc.splitTextToSize('Aprove online em 1 minuto', tw), x2 + 6, top + 17);
-    F('normal', 8); doc.setTextColor(61,61,61); const ll = doc.splitTextToSize('Aponte a câmera do celular para o código ou clique aqui. Basta informar nome e e-mail para aprovar.', tw); doc.text(ll, x2 + 6, top + 27);
-    doc.link(x2 + 6, top + 12, tw, 30, {url}); doc.link(qx, top + 14, qs, qs, {url});
-    F('normal', 7); mute(); doc.text(doc.splitTextToSize('Se preferir, enviamos para assinatura digital via ClickSign.', sw - 12), x2 + 6, top + 51.5); }
+    F('normal', 7.5); mute(); doc.text(doc.splitTextToSize([p.client, acc.doc].filter(Boolean).join('  ·  '), sw - 12)[0], x2 + 6, top + 40); doc.text('Aceite formalizado eletronicamente em ' + dtBR(acc.at), x2 + 6, top + 44.5); }
+  else if (url) { const tw = sw - 12;
+    F('bold', 11); ink(); doc.text('Formalize o aceite online', x2 + 6, top + 17);
+    F('normal', 8); doc.setTextColor(61,61,61); doc.text(doc.splitTextToSize('Acesse pelo link abaixo, confira o escopo e formalize o aceite com seu nome e e-mail.', tw), x2 + 6, top + 23);
+    const bw = tw, by = top + 33; doc.setFillColor(10,10,10); doc.roundedRect(x2 + 6, by, bw, 9, 4.5, 4.5, 'F'); F('bold', 8.5); white(); doc.text('Acessar proposta e formalizar aceite', x2 + 6 + bw/2, by + 5.9, {align: 'center'}); doc.link(x2 + 6, by, bw, 9, {url});
+    F('normal', 6.5); mute(); const ul = doc.splitTextToSize(url, tw); doc.textWithLink(ul[0], x2 + 6, by + 13.5, {url}); if (ul[1]) doc.textWithLink(ul[1], x2 + 6, by + 16.5, {url}); }
   else { doc.line(x2 + 6, top + 30, x2 + sw - 6, top + 30); F('bold', 9); ink(); doc.text(doc.splitTextToSize(p.client || 'Cliente', sw - 12)[0], x2 + 6, top + 35);
     F('normal', 7.5); mute(); doc.text('Assinatura digital enviada via ClickSign.', x2 + 6, top + 40); }
   y = top + 62;
-  if (acc || url) { F('normal', 6.8); grey(); doc.text(doc.splitTextToSize('Aceite eletrônico com registro de data, hora, IP e identificação do signatário, admitido entre as partes nos termos da MP 2.200-2/2001, art. 10, § 2º, e da Lei 14.063/2020.', CW), M, y); }
+  if (acc || url) { F('normal', 6.8); grey(); doc.text(doc.splitTextToSize('Aceite eletrônico com registro de data, hora, IP e identificação do signatário, nos termos da MP 2.200-2/2001, art. 10, § 2º, e da Lei 14.063/2020.', CW), M, y); }
   const N = doc.getNumberOfPages();
   for (let i = 1; i <= N; i++) { doc.setPage(i); doc.setDrawColor(230,230,230); doc.line(M, H - 16, W - M, H - 16); F('normal', 7.5); mute();
     doc.text('FIRMA  ·  agenciafirma.com.br  ·  CNPJ 20.431.153/0001-09', M, H - 11); doc.text(num + '  ·  ' + i + ' de ' + N, W - M, H - 11, {align: 'right'}); }
