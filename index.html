@@ -871,7 +871,10 @@ async function boot(){
 
 /* ---------- login ---------- */
 const AU = $; let aMode = 'login', started = false;
-const isLinkFlow = /type=(recovery|invite|signup|magiclink)/.test(location.hash);
+const _H = new URLSearchParams(location.hash.replace(/^#/, '')), _Q = new URLSearchParams(location.search);
+const linkErr = _H.get('error_code') || _H.get('error') || _Q.get('error_code') || _Q.get('error');
+const isLinkFlow = /type=(recovery|invite|signup|magiclink)/.test(location.hash) || _Q.get('type') === 'recovery';
+const LINK_ERR_MSG = 'Esse link de senha expirou (ele vale 1 hora) ou já foi usado. Informe seu e-mail abaixo para receber um link novo e abra o e-mail mais recente em até 1 hora.';
 function setMode(m, msg, cls){
   aMode = m; AU('auth').hidden = false;
   const L = {login: ['Precificação de projetos', 'Acesso restrito. Entre com seu e-mail da FIRMA e sua senha.', 'Entrar', 'Esqueci minha senha'],
@@ -922,7 +925,8 @@ function startApp(session){
   sb.auth.onAuthStateChange((ev) => { if (ev === 'PASSWORD_RECOVERY') setMode('setpass'); });
   const {data} = await sb.auth.getSession();
   if (data.session && isLinkFlow) { setMode('setpass'); return; }
-  if (data.session) startApp(data.session); else setMode('login', isLinkFlow ? 'O link expirou ou já foi usado. Peça um novo em Esqueci minha senha.' : '', isLinkFlow ? 'err' : '');
+  if (linkErr) { history.replaceState(null, '', location.pathname); if (data.session) { startApp(data.session); return; } setMode('forgot', LINK_ERR_MSG, 'err'); return; }
+  if (data.session) startApp(data.session); else setMode('login', isLinkFlow ? LINK_ERR_MSG : '', isLinkFlow ? 'err' : '');
 })();
 </script>
 </body>
