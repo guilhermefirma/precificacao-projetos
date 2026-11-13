@@ -180,6 +180,15 @@ table.t{border-collapse:separate;border-spacing:0;width:100%;font-size:13px;min-
 .dx{display:flex;align-items:center;justify-content:space-between;gap:10px;background:rgba(255,255,255,.06);border-radius:14px;padding:10px 12px}
 .dx label{font-size:12px;color:var(--oncard-mute)}
 .dx input{width:80px;background:#fff;color:var(--ink);border:0;border-radius:8px;padding:6px 8px;font:700 14px var(--text);text-align:right}
+.cm{display:flex;flex-direction:column;gap:10px;background:rgba(255,255,255,.06);border-radius:14px;padding:12px}
+.cmh{display:flex;align-items:center;justify-content:space-between;gap:10px}.cmh label{font-size:12px;color:var(--oncard-mute)}
+.cmh input{width:80px;background:#fff;color:var(--ink);border:0;border-radius:8px;padding:6px 8px;font:700 14px var(--text);text-align:right}
+.chips{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.chips button{border:1px solid rgba(255,255,255,.25);background:none;color:var(--oncard);border-radius:999px;padding:7px 0;font:600 12.5px var(--text);cursor:pointer}
+.chips button:hover{border-color:#fff}.chips button[aria-pressed="true"]{background:#fff;color:var(--ink);border-color:#fff}
+.seg.two{grid-template-columns:1fr 1fr}
+.cmn{width:100%;background:rgba(255,255,255,.1);color:var(--oncard);border:0;border-radius:8px;padding:8px 10px;font:500 13px var(--text)}.cmn::placeholder{color:var(--oncard-mute)}
+.cm small{font-size:11.5px;color:var(--oncard-mute);line-height:1.45}.cm small b{color:#fff;font-weight:600}
 .sacts{display:flex;gap:8px;flex-wrap:wrap}
 .sbtn{flex:1;font-size:13px;font-weight:600;border-radius:999px;border:1px solid rgba(255,255,255,.35);background:transparent;color:var(--oncard);padding:10px 14px;cursor:pointer;white-space:nowrap}
 .sbtn.w{background:#fff;color:var(--ink);border-color:#fff}
@@ -263,6 +272,15 @@ td .badge{display:inline-block;margin-top:4px;font-size:11px;padding:2px 9px}.ba
   .f-foot-top{gap:28px}.f-cols{gap:24px}.f-col{min-width:130px}
 }
 @media (min-width:721px) and (max-width:1100px){.side{left:50%;right:auto;transform:translateX(-50%);width:min(760px,calc(100% - 48px))}}
+@media (max-width:1100px){
+  .fl input,.fl select,.fl textarea,.cb input,.dx input,.cmh input,.cmn,.ctl input,.pt .pq input,.lnk input{font-size:16px}
+  .fl input,.fl select{height:44px}
+  .fl input[type=date]{-webkit-appearance:none;appearance:none;display:block;line-height:22px;text-align:left}
+  .fl input[type=date]::-webkit-date-and-time-value{text-align:left;margin:0}
+  .ctl input{width:78px}.pt .pq input{width:54px}
+  .side{overscroll-behavior:contain}
+  .chips button,.seg button{padding-block:9px}
+}
 @media (max-width:560px){.f-sys-s{display:none}.f-sys-t{font-size:19px}.f-mark{height:40px}.side .big{font-size:28px}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 
@@ -389,7 +407,7 @@ let SHARES = {}, propF = 'all', propQ = '', DRAFT = null, BOV = {}, SIGIMG = '';
 function draftDirty(d){ const s = PROPS.find(p => p.id === d.id); return !s || JSON.stringify(s.items) !== JSON.stringify(d.items) || s.client !== d.client || s.project !== d.project; } const ACEITE = 'https://guilhermefirma.github.io/precificacao-projetos/aceite/';
 let CAT = [], SET = clone(DEF), CLIENTS = [], PROPS = [], PRESETS = [], OPPCAT = [], CBOPTS = [], cbIdx = 0, P = null, view = 'comp', seg = 'mensal', openF = new Set(['growth']), ready = false, denied = false, offline = false, dirty = false, sideOpen = false;
 function newProp(){ return {id: null, number: '', client: '', project: '', contact: '', date: todayISO(), validade: SET.validade, meses: SET.meses, pagamento: SET.pagamento || '', obs: '',
-  descExtra: 0, mostrarRef: SET.mostrarRef !== false, params: paramsFrom(SET), items: {}, order: []}; }
+  descExtra: 0, comissao: 0, comPag: 'recorrente', comPara: '', mostrarRef: SET.mostrarRef !== false, params: paramsFrom(SET), items: {}, order: []}; }
 function paramsFrom(s){ return {reajuste: +s.reajuste||0, reajusteNota: s.reajusteNota||'', descPadrao: +s.descPadrao||0, imposto: +s.imposto||0, custoOp: +s.custoOp||0, custoDir: +s.custoDir||0, arred: +s.arred||0, fonte: s.fonte||'', ressalva: s.ressalva||'', assinante: s.assinante == null || s.assinante === 'Vitor Horvat' ? 'Vitor Horvath' : s.assinante, assinanteCargo: s.assinanteCargo||''}; }
 function snap(it){ return {code: it.code, front: it.front, name: it.name, desc: it.desc, rec: it.rec, unit: it.unit, ref: +it.ref||0, basis: it.basis||[], parts: it.parts && it.parts.length ? clone(it.parts) : undefined}; }
 function saveDraft(){ try { if (dirty) sessionStorage.setItem('pp-draft', JSON.stringify(P)); else sessionStorage.removeItem('pp-draft'); } catch(_) {} }
@@ -403,20 +421,24 @@ const partsText = (it, chosen) => (it.parts||[]).filter(pt => chosen && chosen[p
 function roundUp(v, step){ return step > 0 ? Math.ceil(v/step - 1e-9) * step : Math.round(v*100)/100; }
 function calc(p){
   const s = p.params, rj = 1 + s.reajuste/100, std = 1 - s.descPadrao/100, ex = 1 - (+p.descExtra||0)/100, ded = (s.imposto + s.custoOp + s.custoDir)/100;
+  const cm = Math.min(100, Math.max(0, +p.comissao||0))/100, kick = p.comPag === 'kickoff';
   const codes = (p.order||[]).filter(c => p.items[c]).concat(Object.keys(p.items).filter(c => !(p.order||[]).includes(c)));
   const L = [];
   const mk = (it, sel, tabela) => {
     const fx = +sel.fixed > 0 ? +sel.fixed : 0, afterStd = tabela*std, pre = fx || afterStd*ex*(1 - (+sel.desc||0)/100), price = fx ? fx : (tabela > 0 ? roundUp(pre, s.arred) : 0);
+    const com = kick && it.rec === 'mensal' ? 0 : price*cm;
     return {code: it.code, it, sel, fixed: !!fx, qty: +sel.qty||0, desc: +sel.desc||0, rec: it.rec, tabela, std: tabela - afterStd, extra: afterStd - pre, round: price - pre, price,
-      imp: price*s.imposto/100, op: price*s.custoOp/100, dir: price*s.custoDir/100, mg: price*(1 - ded), unitRef: it.ref*rj};
+      imp: price*s.imposto/100, op: price*s.custoOp/100, dir: price*s.custoDir/100, com, mg: price*(1 - ded) - com, unitRef: it.ref*rj};
   };
   codes.forEach(c => { const sel = p.items[c], it = sel.snap; if (it.unit !== 'pct') L.push(mk(it, sel, (hasParts(it) ? partsRef(it, sel.parts) : it.ref)*rj*(+sel.qty||0))); });
   codes.forEach(c => { const sel = p.items[c], it = sel.snap; if (it.unit === 'pct') { const base = L.filter(l => l.rec === it.rec).reduce((a,l) => a + l.tabela, 0); L.push(mk(it, sel, base*(+sel.qty||0)/100)); } });
-  const z = () => ({tabela:0, std:0, extra:0, round:0, price:0, imp:0, op:0, dir:0, mg:0, n:0});
+  const z = () => ({tabela:0, std:0, extra:0, round:0, price:0, imp:0, op:0, dir:0, com:0, mg:0, n:0});
   const T = {mensal: z(), unico: z()};
-  L.forEach(l => { const t = T[l.rec === 'mensal' ? 'mensal' : 'unico']; ['tabela','std','extra','round','price','imp','op','dir','mg'].forEach(k => t[k] += l[k]); t.n++; });
+  L.forEach(l => { const t = T[l.rec === 'mensal' ? 'mensal' : 'unico']; ['tabela','std','extra','round','price','imp','op','dir','com','mg'].forEach(k => t[k] += l[k]); t.n++; });
   const m = Math.max(0, +p.meses||0), C = z();
-  ['tabela','std','extra','round','price','imp','op','dir','mg'].forEach(k => C[k] = T.unico[k] + T.mensal[k]*m); C.n = T.unico.n + T.mensal.n;
+  ['tabela','std','extra','round','price','imp','op','dir','com','mg'].forEach(k => C[k] = T.unico[k] + T.mensal[k]*m); C.n = T.unico.n + T.mensal.n;
+  const k1 = kick && m > 0 ? T.mensal.price*cm : 0; C.com += k1; C.mg -= k1;
+  T.com = {pct: cm, kick, kickoff: T.unico.com + (m > 0 ? T.mensal.price*cm : 0), mes: kick ? 0 : T.mensal.com, total: C.com};
   T.contrato = C; T.lines = L; T.meses = m; return T;
 }
 
@@ -562,23 +584,40 @@ function sideHTML(T){
       ${row('Impostos ' + PCT(s.imposto/100), BRL(-t.imp))}
       ${row('Custo operacional ' + PCT(s.custoOp/100), BRL(-t.op))}
       ${row('Custo direto ' + PCT(s.custoDir/100), BRL(-t.dir), '', 'equipe e atendimento')}
+      ${T.com.pct ? row('Comissão ' + PCT(T.com.pct), BRL(-t.com), '', comSub(T)) : ''}
       ${row('Margem FIRMA', BRL(t.mg), 'tot mg' + (t.mg < 0 ? ' neg' : ''), t.price ? PCT(mgp) : '')}
     </div>
     <div class="dx"><label for="dx">Desconto adicional na proposta inteira</label><span style="white-space:nowrap"><input id="dx" inputmode="decimal" value="${fmtIn(P.descExtra||0)}"> %</span></div>
+    ${comHTML(T)}
     <div class="sacts"><button class="sbtn" data-a="save">Salvar</button><button class="sbtn w" data-a="share" ${T.contrato.n ? '' : 'disabled'}>${P.share ? 'Atualizar link' : 'Gerar link da proposta'}</button></div>
     ${accHTML(T)}
     <button class="sbtn" data-a="preset" ${T.contrato.n ? '' : 'disabled'} style="flex:none">Salvar como projeto de referência</button>
-    <div class="note">Custos sobre o preço ao cliente (soma ${PCT(ded/100)}). Tabela: ${esc(s.fonte)}, atualizada em ${PCT2(s.reajuste/100)} (${esc(s.reajusteNota)}). Uso interno, não sai na proposta.</div></div>`;
+    <div class="note">Custos e comissão sobre o preço ao cliente (custos somam ${PCT(ded/100)}). A comissão não altera o preço ao cliente. Tabela: ${esc(s.fonte)}, atualizada em ${PCT2(s.reajuste/100)} (${esc(s.reajusteNota)}). Uso interno, não sai na proposta.</div></div>`;
 }
+function comSub(T){ const c = T.com;
+  if (seg === 'mensal') return c.kick ? 'pontual: ' + BRL(c.kickoff) + ' no kickoff' : 'recorrente, todo mês';
+  if (seg === 'unico') return c.kick ? 'paga no kickoff' : 'sobre os itens únicos';
+  return c.kick ? 'pontual no kickoff, 1º mês' : 'recorrente, ' + T.meses + (T.meses === 1 ? ' mês' : ' meses'); }
+function comHTML(T){ const c = T.com, v = +P.comissao || 0, opts = [0, 5, 10, 15, 20];
+  const who = (P.comPara || '').trim() || 'O comissionado';
+  const res = !v ? '' : c.kick
+    ? `${esc(who)} recebe <b>${BRL(c.kickoff)}</b> uma única vez, no kickoff: ${PCT(c.pct)} sobre o 1º mês${T.unico.n ? ' (1ª mensalidade + itens únicos)' : ''}.`
+    : `${esc(who)} recebe <b>${BRL(c.mes)}/mês</b>${T.unico.n ? ' + ' + BRL(T.unico.com) + ' nos itens únicos' : ''}, total de <b>${BRL(c.total)}</b> no contrato.`;
+  return `<div class="cm"><div class="cmh"><label for="cmx">Comissionamento</label><span style="white-space:nowrap"><input id="cmx" inputmode="decimal" value="${fmtIn(v)}" aria-label="Percentual de comissão"> %</span></div>
+    <div class="chips" role="group" aria-label="Percentual de comissão">${opts.map(o => `<button data-cm="${o}" aria-pressed="${v === o}">${o ? o + '%' : 'Sem'}</button>`).join('')}</div>
+    ${v ? `<div class="seg two" role="group" aria-label="Pagamento da comissão">${[['recorrente','Recorrente mensal'],['kickoff','Pontual no kickoff']].map(([k,l]) => `<button data-cmp="${k}" aria-pressed="${P.comPag === k}">${l}</button>`).join('')}</div>
+    <input id="cmn" class="cmn" value="${esc(P.comPara || '')}" placeholder="Comissionado (opcional)" autocomplete="off" aria-label="Comissionado">
+    <small>${res}</small>` : ''}</div>`; }
 function discTable(T){
   if (!T.lines.length) return '<div class="empty"><b>Nenhum item marcado</b>Abra uma frente e marque os itens do escopo. O preço ao cliente e a margem aparecem no card preto.</div>';
+  const hc = T.com.pct > 0;
   const r = (l) => `<tr><td class="l">${esc(l.it.name)}<small>${esc(frontName(l.it.front))} · ${l.rec === 'mensal' ? 'mensal' : 'único'}${hasParts(l.it) ? ' · ' + esc(partsText(l.it, l.sel.parts)) : ''}${l.fixed ? ' · preço fechado' : ''}</small></td>
     <td>${l.it.unit === 'pct' ? fmtIn(l.qty) + '%' : fmtIn(l.qty) + ' ' + esc(unitLabel(l.it, l.qty))}</td><td>${BRL(l.tabela)}</td><td>${PCT(l.tabela ? 1 - l.price/l.tabela : 0)}</td><td><b>${BRL(l.price)}</b></td>
-    <td class="neg">${BRL(-l.imp)}</td><td class="neg">${BRL(-(l.op + l.dir))}</td><td class="${l.mg < 0 ? 'neg' : 'pos'}"><b>${BRL(l.mg)}</b></td></tr>`;
-  const sumRow = (lbl, t) => t.n ? `<tr class="sum"><td class="l">${lbl}</td><td></td><td>${BRL(t.tabela)}</td><td>${PCT(t.tabela ? 1 - t.price/t.tabela : 0)}</td><td>${BRL(t.price)}</td><td class="neg">${BRL(-t.imp)}</td><td class="neg">${BRL(-(t.op + t.dir))}</td><td class="pos">${BRL(t.mg)}</td></tr>` : '';
+    <td class="neg">${BRL(-l.imp)}</td><td class="neg">${BRL(-(l.op + l.dir))}</td>${hc ? `<td class="neg">${l.com ? BRL(-l.com) : '·'}</td>` : ''}<td class="${l.mg < 0 ? 'neg' : 'pos'}"><b>${BRL(l.mg)}</b></td></tr>`;
+  const sumRow = (lbl, t) => t.n ? `<tr class="sum"><td class="l">${lbl}</td><td></td><td>${BRL(t.tabela)}</td><td>${PCT(t.tabela ? 1 - t.price/t.tabela : 0)}</td><td>${BRL(t.price)}</td><td class="neg">${BRL(-t.imp)}</td><td class="neg">${BRL(-(t.op + t.dir))}</td>${hc ? `<td class="neg">${t.com ? BRL(-t.com) : '·'}</td>` : ''}<td class="pos">${BRL(t.mg)}</td></tr>` : '';
   const m = T.lines.filter(l => l.rec === 'mensal'), u = T.lines.filter(l => l.rec !== 'mensal');
-  return `<div class="bar"><h2>Discriminação</h2><span class="st">Margem real por item, depois de impostos e custos</span></div>
-    <div class="tw"><table class="t"><thead><tr><th class="l">Item</th><th>Qtd.</th><th>Tabela</th><th>Desconto</th><th>Preço cliente</th><th>Impostos</th><th>Custos</th><th>Margem</th></tr></thead><tbody>
+  return `<div class="bar"><h2>Discriminação</h2><span class="st">Margem real por item, depois de impostos, custos${hc ? ' e comissão ' + PCT(T.com.pct) + (T.com.kick ? ' pontual no kickoff' : ' recorrente') : ''}</span></div>
+    <div class="tw"><table class="t"><thead><tr><th class="l">Item</th><th>Qtd.</th><th>Tabela</th><th>Desconto</th><th>Preço cliente</th><th>Impostos</th><th>Custos</th>${hc ? '<th>Comissão</th>' : ''}<th>Margem</th></tr></thead><tbody>
     ${u.map(r).join('')}${sumRow('Total itens únicos', T.unico)}${m.map(r).join('')}${sumRow('Total mensal', T.mensal)}${T.mensal.n && T.meses ? sumRow('Contrato (' + T.meses + ' meses)', T.contrato) : ''}
     </tbody></table></div>`;
 }
@@ -845,6 +884,8 @@ document.addEventListener('click', async e => {
     else if (k === 'preset') presetModal();
     return; }
   const fb = t.closest('[data-front]'); if (fb) { const k = fb.dataset.front; openF.has(k) ? openF.delete(k) : openF.add(k); render(); return; }
+  const cmb = t.closest('[data-cm]'); if (cmb) { P.comissao = +cmb.dataset.cm; markDirty(); refreshNums(); return; }
+  const cmp = t.closest('[data-cmp]'); if (cmp) { P.comPag = cmp.dataset.cmp; markDirty(); refreshNums(); return; }
   const sg = t.closest('[data-seg]'); if (sg) { seg = sg.dataset.seg; render(); return; }
   if (t.closest('#mbar')) { sideOpen = !sideOpen; render(); return; }
   const bs = t.closest('[data-basis]'); if (bs) { basisModal(bs.dataset.basis); return; }
@@ -883,8 +924,10 @@ document.addEventListener('input', e => {
   if (t.dataset.fx) { const s = P.items[t.dataset.fx]; if (s) { const v = numIn(t.value); delete s.bfx; if (v > 0) s.fixed = v; else delete s.fixed; markDirty(); refreshNums(); } return; }
   if (t.dataset.d) { const s = P.items[t.dataset.d]; if (s) { s.desc = Math.min(100, Math.max(0, numIn(t.value))); markDirty(); refreshNums(); } return; }
   if (t.id === 'dx') { P.descExtra = Math.min(100, Math.max(0, numIn(t.value))); markDirty(); refreshNums(); return; }
+  if (t.id === 'cmx') { P.comissao = Math.min(100, Math.max(0, numIn(t.value))); markDirty(); refreshNums(); return; }
+  if (t.id === 'cmn') { P.comPara = t.value; markDirty(); refreshNums(); return; }
 });
-function refreshNums(){ const T = calc(P), sd = $('side'); if (sd) { const f = document.activeElement && document.activeElement.id === 'dx'; sd.innerHTML = sideHTML(T); if (f) { const x = $('dx'); x.focus(); x.setSelectionRange(x.value.length, x.value.length); } }
+function refreshNums(){ const T = calc(P), sd = $('side'); if (sd) { const ae = document.activeElement, f = ae && ['dx','cmx','cmn'].includes(ae.id) ? ae.id : ''; sd.innerHTML = sideHTML(T); const x = f && $(f); if (x) { x.focus(); x.setSelectionRange(x.value.length, x.value.length); } }
   const dc = $('disc'); if (dc) dc.innerHTML = discTable(T);
   document.querySelectorAll('[data-badge]').forEach(el => { el.outerHTML = frontBadge(el.dataset.badge, T, +el.dataset.total); });
   document.querySelectorAll('[data-it]').forEach(el => { const L = T.lines.find(l => l.code === el.dataset.it), lt = el.querySelector('.lt'); if (lt) lt.textContent = L ? BRL(L.price) + (L.rec === 'mensal' ? '/mês' : '') : ''; }); }
@@ -1082,7 +1125,7 @@ async function exportPDF(btn, p){
 
 /* ---------- carga ---------- */
 async function loadCat(){ return (await DB.all('pricing_catalog')).sort((a,b) => (a.order||0) - (b.order||0)); }
-function normProp(p){ p.items = p.items || {}; p.order = p.order || Object.keys(p.items); p.params = Object.assign(paramsFrom(DEF), p.params || {}); if (!p.params.assinante || p.params.assinante === 'Vitor Horvat') p.params.assinante = 'Vitor Horvath'; return p; }
+function normProp(p){ p.comissao = Math.min(100, Math.max(0, +p.comissao || 0)); p.comPag = p.comPag === 'kickoff' ? 'kickoff' : 'recorrente'; p.comPara = p.comPara || ''; p.items = p.items || {}; p.order = p.order || Object.keys(p.items); p.params = Object.assign(paramsFrom(DEF), p.params || {}); if (!p.params.assinante || p.params.assinante === 'Vitor Horvat') p.params.assinante = 'Vitor Horvath'; return p; }
 async function boot(){
   try {
     const [cat, set, props] = await Promise.all([loadCat(), DB.all('pricing_settings'), DB.all('pricing_proposals')]);
