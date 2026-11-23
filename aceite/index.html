@@ -141,7 +141,7 @@ function page(){
       ${cond ? `<section><div class="sh"><span class="n">03</span><h2>Condições</h2></div><div class="cd">${cond}</div></section>` : ''}
       <section id="aceite" style="border-bottom:0"><div class="sh"><span class="n">${cond ? '04' : '03'}</span><h2>${ACC ? 'Aceite formalizado' : 'Formalizar aceite'}</h2></div>
         <div class="sig">${firma}${cli}</div>${form}
-        <p class="legal">Aceite eletrônico com registro de data, hora, IP e identificação do signatário, nos termos da MP 2.200-2/2001, art. 10, § 2º, e da Lei 14.063/2020. Se preferir, a FIRMA envia esta proposta para assinatura digital via ClickSign.</p></section>
+        <p class="legal">Aceite eletrônico com registro de data, hora, IP e identificação do signatário, nos termos da MP 2.200-2/2001, art. 10, § 2º, e da Lei 14.063/2020.</p></section>
     </div>${foot()}`;
   $('pdf').addEventListener('click', () => window.print());
   const f = $('f'); if (!f) return;
