@@ -1102,8 +1102,7 @@ async function buildPDF(p, ex){
     F('normal', 8); doc.setTextColor(61,61,61); doc.text(doc.splitTextToSize('Acesse pelo link abaixo, confira o escopo e formalize o aceite com seu nome e e-mail.', tw), x2 + 6, top + 23);
     const bw = tw, by = top + 33; doc.setFillColor(10,10,10); doc.roundedRect(x2 + 6, by, bw, 9, 4.5, 4.5, 'F'); F('bold', 8.5); white(); doc.text('Acessar proposta e formalizar aceite', x2 + 6 + bw/2, by + 5.9, {align: 'center'}); doc.link(x2 + 6, by, bw, 9, {url});
     F('normal', 6.5); mute(); const ul = doc.splitTextToSize(url, tw); doc.textWithLink(ul[0], x2 + 6, by + 13.5, {url}); if (ul[1]) doc.textWithLink(ul[1], x2 + 6, by + 16.5, {url}); }
-  else { doc.line(x2 + 6, top + 30, x2 + sw - 6, top + 30); F('bold', 9); ink(); doc.text(doc.splitTextToSize(coName(p) || 'Cliente', sw - 12)[0], x2 + 6, top + 35);
-    F('normal', 7.5); mute(); doc.text('Assinatura digital enviada via ClickSign.', x2 + 6, top + 40); }
+  else { doc.line(x2 + 6, top + 30, x2 + sw - 6, top + 30); F('bold', 9); ink(); doc.text(doc.splitTextToSize(coName(p) || 'Cliente', sw - 12)[0], x2 + 6, top + 35); }
   y = top + 62;
   if (acc || url) { F('normal', 6.8); grey(); doc.text(doc.splitTextToSize('Aceite eletrônico com registro de data, hora, IP e identificação do signatário, nos termos da MP 2.200-2/2001, art. 10, § 2º, e da Lei 14.063/2020.', CW), M, y); }
   const N = doc.getNumberOfPages();
